@@ -1,5 +1,5 @@
 /*
-	* Belongs to @starburst997 on github,
+	* Original file belongs to @starburst997 on github,
 	* from repository "https://github.com/notessimo-archive/audio-decoder/tree/master"
 
 	* Under the following license:
@@ -24,10 +24,13 @@
 	* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	* SOFTWARE.
+	* 
+	* Modified by @YanniZ06
  */
 
 package decoder;
 
+//import lime.media.openal.AL;
 import haxe.io.Bytes;
 import haxe.io.Output;
 #if audio16

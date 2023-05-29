@@ -13,7 +13,7 @@ class Sound {
      * Loads in a new Sound object and returns it.
      * TODO: Add parameter for quickloading???
      */
-    public function new() {
+    public function new(sndInfo:SoundLoader.SoundInfo) {
         source = new SourceHandle(AL.createSource());
 
         /*device = ALC.openDevice(null);
@@ -21,6 +21,7 @@ class Sound {
         ALC.makeContextCurrent(context);*/
 
         AL.getError();
-        AL.createBuffer();
+        buffer = new BufferHandle(AL.createBuffer());
+		//AL.bufferData(buffer.handle, )//g_Buffers[0], format, data, size, freq);
     }
 }

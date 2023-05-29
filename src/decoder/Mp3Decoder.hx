@@ -1,5 +1,5 @@
 /*
-	* Belongs to @starburst997 on github,
+	* Original file belongs to @starburst997 on github,
 	* from repository "https://github.com/notessimo-archive/audio-decoder/tree/master"
 
 	* Under the following license:
@@ -24,6 +24,8 @@
 	* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	* SOFTWARE.
+	* 
+	* Modified by @YanniZ06
  */
 
 package decoder;
@@ -72,11 +74,12 @@ class Mp3Decoder extends Decoder
 typedef Mp3Info =
 {
 	var sampleRate:Int;
+	var bitsPerSample:Int;
 	var channels:Int;
 	var length:Int;
 };
 
-private class Mp3Utils extends format.mp3.Reader
+class Mp3Utils extends format.mp3.Reader
 {
 	var bi:BytesInput;
 	var channels:Int = 1;
@@ -89,6 +92,8 @@ private class Mp3Utils extends format.mp3.Reader
 		super(i);
 	}
 
+	var lastFrame:MP3Frame = null;
+	var bitrate:Int = 0;
 	public override function readFrame():MP3Frame
 	{
 		var header = readFrameHeader();
@@ -119,13 +124,17 @@ private class Mp3Utils extends format.mp3.Reader
 
 			bi.position += length;
 
-			return {
+			lastFrame = {
 				header: header,
 				data: null
 			};
+
+			return lastFrame;
 		}
 		catch (e:haxe.io.Eof)
 		{
+			if (lastFrame != null)
+				bitrate = Std.parseInt(lastFrame.header.bitrate.getName().split('_')[1]); //E.G: Enum(BR_8) -> ["BR", "8"] -> "8" -> 8
 			return null;
 		}
 	}
@@ -135,11 +144,13 @@ private class Mp3Utils extends format.mp3.Reader
 		var reader = new Mp3Utils(new BytesInput(bytes));
 
 		reader.readFrames();
+		@:privateAccess final bps:Int = Std.int(reader.sampleRate / reader.bitrate); // bitrate = sampleRate * bitsPerSample ---> bitsPerSample = sampleRate / bitrate;
 
 		return {
 			sampleRate: reader.sampleRate,
 			channels: reader.channels,
-			length: reader.samples
+			length: reader.samples,
+			bitsPerSample: bps
 		};
 	}
 }
