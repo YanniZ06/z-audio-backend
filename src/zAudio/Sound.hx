@@ -22,6 +22,6 @@ class Sound {
 
         AL.getError();
         buffer = new BufferHandle(AL.createBuffer());
-		//AL.bufferData(buffer.handle, )//g_Buffers[0], format, data, size, freq);
+		AL.bufferData(buffer.handle, sndInfo.format, sndInfo.data, sndInfo.data.length, sndInfo.freq); //g_Buffers[0], format, data, size, freq);
     }
 }

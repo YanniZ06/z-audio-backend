@@ -1,11 +1,15 @@
 package zAudio;
+import sys.io.File;
+import lime.utils.Int32Array;
+import haxe.io.Bytes;
 import decoder.Mp3Decoder;
 import haxe.http.HttpBase;
+import lime.utils.ArrayBufferView;
 
 typedef SoundInfo = {
     var format:Int;
-	var data:lime.utils.ArrayBufferView;
-    var size:Int;
+	var data:ArrayBufferView;
+    //var size:Int; We get it from the data length already :)
     var freq:Int;
 }
 
@@ -54,7 +58,7 @@ class SoundLoader
 		return null;
 	}
 
-	public static function fromFile(path:String)
+	public static function fromFile(path:String):SoundInfo
 	{
 		var pathSplit:Array<String> = path.split('.');
 		final type:String = pathSplit[path.length - 1];
@@ -64,14 +68,21 @@ class SoundLoader
 			default:
 				throw 'Error, path "$path" does not point to a valid ogg, wav or mp3 file!\nThe path should end with one of the given three extension names!';
 		}
+		final fileBytes = File.getBytes(path);
+		switch (type)
+		{
+			case 'mp3': return fromMp3(fileBytes);
+			case 'ogg':
+		}
+
+		return null;
 	}
 
 	public static function fromMp3(bytes:haxe.io.Bytes):SoundInfo {
 		var info = Mp3Utils.getInfo(bytes);
         return {
 			format: resolveFormat(info, MP3),
-            data: null,
-            size: null,
+			data: resolveDataFromBytes(info.data),
 			freq: info.sampleRate
         };
     }
@@ -92,4 +103,7 @@ class SoundLoader
 		}
 		return 0;
 	}
+
+	//This took stupidly long to figure out, sincerely fuck you lime for making ArrayBufferViews so hard to create
+	private static inline function resolveDataFromBytes(bytes:Bytes):ArrayBufferView return cast Int32Array.fromBytes(bytes);
 }

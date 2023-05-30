@@ -30,6 +30,7 @@
 
 package decoder;
 
+import openfl.utils.ByteArray;
 import format.mp3.Data;
 import format.mp3.Tools;
 import haxe.io.Bytes;
@@ -77,6 +78,7 @@ typedef Mp3Info =
 	var bitsPerSample:Int;
 	var channels:Int;
 	var length:Int;
+	var data:Bytes;
 };
 
 class Mp3Utils extends format.mp3.Reader
@@ -94,6 +96,7 @@ class Mp3Utils extends format.mp3.Reader
 
 	var lastFrame:MP3Frame = null;
 	var bitrate:Int = 0;
+	var fullFrameBytes:ByteArray = new ByteArray();
 	public override function readFrame():MP3Frame
 	{
 		var header = readFrameHeader();
@@ -118,15 +121,17 @@ class Mp3Utils extends format.mp3.Reader
 
 		try
 		{
-			var length = Tools.getSampleDataSizeHdr(header);
-			samples += Tools.getSampleCountHdr(header);
-			sampleSize += length;
+			var data = i.read(Tools.getSampleDataSizeHdr(header));
 
-			bi.position += length;
+			fullFrameBytes.writeBytes(data, fullFrameBytes.length, data.length);
+			samples += Tools.getSampleCountHdr(header);
+			sampleSize += data.length;
+
+			bi.position += data.length;
 
 			lastFrame = {
 				header: header,
-				data: null
+				data: data
 			};
 
 			return lastFrame;
@@ -143,14 +148,19 @@ class Mp3Utils extends format.mp3.Reader
 	{
 		var reader = new Mp3Utils(new BytesInput(bytes));
 
-		reader.readFrames();
-		@:privateAccess final bps:Int = Std.int(reader.sampleRate / reader.bitrate); // bitrate = sampleRate * bitsPerSample ---> bitsPerSample = sampleRate / bitrate;
-
+		var mp3Info:MP3 = reader.read();
+		var bps:Int = 0;
+		var fullBytes:Bytes = null;
+		@:privateAccess { 
+			bps = Std.int(reader.sampleRate / reader.bitrate); // bitrate = sampleRate * bitsPerSample ---> bitsPerSample = sampleRate / bitrate;
+			fullBytes = reader.fullFrameBytes;
+		}
 		return {
 			sampleRate: reader.sampleRate,
 			channels: reader.channels,
 			length: reader.samples,
-			bitsPerSample: bps
+			bitsPerSample: bps,
+			data: fullBytes
 		};
 	}
 }
