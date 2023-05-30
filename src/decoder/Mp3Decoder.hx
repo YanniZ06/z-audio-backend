@@ -97,12 +97,17 @@ class Mp3Utils extends format.mp3.Reader
 	var lastFrame:MP3Frame = null;
 	var bitrate:Int = 0;
 	var fullFrameBytes:ByteArray = new ByteArray();
+	var frameCount:Int = 0;
 	public override function readFrame():MP3Frame
 	{
+		frameCount++;
 		var header = readFrameHeader();
 
 		if (header == null || Tools.isInvalidFrameHeader(header))
 			return null;
+
+		trace(frameCount);
+
 
 		channels = header.channelMode == Mono ? 1 : 2;
 
@@ -122,8 +127,15 @@ class Mp3Utils extends format.mp3.Reader
 		try
 		{
 			var data = i.read(Tools.getSampleDataSizeHdr(header));
+			trace(data);
+			trace(fullFrameBytes);
 
-			fullFrameBytes.writeBytes(data, fullFrameBytes.length, data.length);
+			try {
+				fullFrameBytes.writeBytes(data, fullFrameBytes.length, data.length);
+			}
+			catch(e) {
+				//trace('Error ($e), could not continue writing to ByteArray.\n\nByteArray info: Length = ${fullFrameBytes.length}, Bytes: $fullFrameBytes\n\nData Info: Length = ${data.length}, Bytes = $data\n\n');
+			}
 			samples += Tools.getSampleCountHdr(header);
 			sampleSize += data.length;
 

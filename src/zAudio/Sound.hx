@@ -20,8 +20,21 @@ class Sound {
         context = ALC.createContext(device, null);
         ALC.makeContextCurrent(context);*/
 
-        AL.getError();
+        //AL.getError();
         buffer = new BufferHandle(AL.createBuffer());
 		AL.bufferData(buffer.handle, sndInfo.format, sndInfo.data, sndInfo.data.length, sndInfo.freq); //g_Buffers[0], format, data, size, freq);
+		AL.sourcei(source.handle, AL.BUFFER, buffer.handle);
+    }
+
+    public function play() {
+        AL.sourcePlay(source.handle);
+    }
+
+    public function pause() {
+        AL.sourcePause(source.handle);
+    }
+
+    public function stop() {
+        AL.sourceStop(source.handle);
     }
 }

@@ -61,7 +61,7 @@ class SoundLoader
 	public static function fromFile(path:String):SoundInfo
 	{
 		var pathSplit:Array<String> = path.split('.');
-		final type:String = pathSplit[path.length - 1];
+		final type:String = pathSplit[pathSplit.length - 1]; 
 		switch (type)
 		{
 			case 'ogg' | 'wav' | 'mp3': // All good :)
@@ -72,7 +72,8 @@ class SoundLoader
 		switch (type)
 		{
 			case 'mp3': return fromMp3(fileBytes);
-			case 'ogg':
+			case 'ogg': throw "UNIMPLEMENTED!! (ogg)";
+			case 'wav': throw "UNIMPLEMENTED!! (wav)";
 		}
 
 		return null;
