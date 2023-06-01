@@ -535,4 +535,15 @@ class Decoder
 			_decode(start, end, next);
 		}
 	}
+
+	//? UTILITY
+
+	/**
+	 * Calculates the bits per sample by taking in a sampleRate and bitrate.
+	 * 
+	 * This works because `bitrate = sampleRate * bitsPerSample` which can be reversed to `bitsPerSample = sampleRate / bitrate`.
+	 * @param sampleRate Input sampleRate from the sound info
+	 * @param bitrate Input bitrate from the sound info
+	 */
+	public static inline function calc_BitsPerSample(sampleRate:Int, bitrate:Int):Int return Std.int(sampleRate / bitrate);
 }

@@ -37,7 +37,7 @@ import haxe.Int64;
 import lime.utils.UInt8Array;
 import lime.utils.Int16Array;
 import lime.utils.Float32Array;
-import lime.media.codecs.vorbis.VorbisFile;
+import lime.media.vorbis.VorbisFile;
 #else
 import stb.format.vorbis.Reader;
 #end
@@ -66,6 +66,8 @@ class OggDecoder extends Decoder
   #else
   var reader:Reader;
   #end
+
+  public var bitrate:Int = 0;
   
   // Constructor
   public function new( bytes:Bytes, delay:Bool = false )
@@ -74,17 +76,17 @@ class OggDecoder extends Decoder
   }
 
   override function create()
-  {
-    trace("");
-    
+  { 
     #if lime_vorbis
     reader = VorbisFile.fromBytes( bytes );
     //reader.streams(); // What is this ???
     
     var info = reader.info();
+		bitrate = info.bitrateNominal;
     _process( Int64.toInt(reader.pcmTotal()), info.channels, info.rate );
     #else
     reader = Reader.openFromBytes(bytes);
+		bitrate = reader.header.nominalBitRate;
     _process( reader.totalSample, reader.header.channel, reader.header.sampleRate );
     #end
   }

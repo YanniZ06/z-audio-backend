@@ -28,13 +28,13 @@
 	* Modified by @YanniZ06
  */
 
-package decoder;
+/*package decoder;
 
 import openfl.utils.ByteArray;
 import format.mp3.Data;
 import format.mp3.Tools;
 import haxe.io.Bytes;
-import haxe.io.BytesInput;
+import haxe.io.BytesInput;*/
 
 /**
  * Simple interface to MP3 Decoder
@@ -45,7 +45,7 @@ import haxe.io.BytesInput;
  *
  * Will need some major cleanup, mostly experimenting right now...
  */
-class Mp3Decoder extends Decoder
+/*class Mp3Decoder extends Decoder
 {
 	// Constructor
 	public function new(bytes:Bytes, delay:Bool = false)
@@ -66,7 +66,7 @@ class Mp3Decoder extends Decoder
 	// Read samples inside the MP3
 	private override function read(start:Int, end:Int):Bool
 	{
-		// TODO: !!! WDYM???? TODO???? I THOUGHT THIS WAS FINISHED NOOO
+		// TODO: !!!
 		return true;
 	}
 }
@@ -127,11 +127,8 @@ class Mp3Utils extends format.mp3.Reader
 		try
 		{
 			var data = i.read(Tools.getSampleDataSizeHdr(header));
-			trace(data);
-			trace(fullFrameBytes);
-
 			try {
-				fullFrameBytes.writeBytes(data, fullFrameBytes.length, data.length);
+				fullFrameBytes.writeBytes(data, fullFrameBytes.length, data.length); //You don't work!
 			}
 			catch(e) {
 				//trace('Error ($e), could not continue writing to ByteArray.\n\nByteArray info: Length = ${fullFrameBytes.length}, Bytes: $fullFrameBytes\n\nData Info: Length = ${data.length}, Bytes = $data\n\n');
@@ -150,7 +147,7 @@ class Mp3Utils extends format.mp3.Reader
 		}
 		catch (e:haxe.io.Eof)
 		{
-			if (lastFrame != null)
+			if (lastFrame != null) //This doesnt do much since bitrate is VARIABLE ffs
 				bitrate = Std.parseInt(lastFrame.header.bitrate.getName().split('_')[1]); //E.G: Enum(BR_8) -> ["BR", "8"] -> "8" -> 8
 			return null;
 		}
@@ -164,7 +161,7 @@ class Mp3Utils extends format.mp3.Reader
 		var bps:Int = 0;
 		var fullBytes:Bytes = null;
 		@:privateAccess { 
-			bps = Std.int(reader.sampleRate / reader.bitrate); // bitrate = sampleRate * bitsPerSample ---> bitsPerSample = sampleRate / bitrate;
+			bps = Decoder.calc_BitsPerSample(reader.sampleRate, reader.bitrate);
 			fullBytes = reader.fullFrameBytes;
 		}
 		return {
@@ -175,4 +172,4 @@ class Mp3Utils extends format.mp3.Reader
 			data: fullBytes
 		};
 	}
-}
+}*/
