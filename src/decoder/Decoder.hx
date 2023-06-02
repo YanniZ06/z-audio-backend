@@ -34,9 +34,10 @@ package decoder;
 import haxe.io.Bytes;
 import haxe.io.Output;
 #if audio16
-import lime.utils.Int16Array;
+import lime.utils.Int16Array as StoreArray;
 #else
-import haxe.io.Float32Array;
+// import haxe.io.Float32Array as StoreArray;
+import lime.utils.UInt8Array as StoreArray;
 #end
 
 #if tink_await
@@ -57,19 +58,11 @@ private typedef Chunk =
 // BytesOutput
 private class ArrayOutput extends Output
 {
-	#if audio16
-	public var array:Int16Array;
-	#else
-	public var array:Float32Array;
-	#end
+	public var array:StoreArray;
 
 	public var position:Int = 0;
 
-	#if audio16
-	public function new(array:Int16Array)
-	#else
-	public function new(array:Float32Array)
-	#end
+	public function new(array:StoreArray)
 
 	{
 		this.array = array;
@@ -89,7 +82,8 @@ private class ArrayOutput extends Output
 	#else
 	override function writeFloat(f:Float)
 	{
-		array[position++] = f;
+		@:privateAccess array.__set(position++, Std.int(f));
+		//array[position++] = f;
 	}
 	#end
 }
@@ -117,11 +111,7 @@ class Decoder
 	#end
 
 	// Decoded Bytes per sample
-	#if audio16
-	public var decoded:Int16Array;
-	#else
-	public var decoded:Float32Array;
-	#end
+	public var decoded:StoreArray;
 
 	private var handlers:Array<Void->Void> = [];
 
@@ -180,11 +170,11 @@ class Decoder
 		this.sampleRate = sampleRate;
 
 		// Create Bytes big enough to hold the decoded bits
-		#if audio16
-		decoded = new Int16Array(length * channels);
-		#else
+		//#if audio16
+		decoded = new StoreArray(length * channels);
+		/*#else
 		decoded = new Float32Array(length * channels);
-		#end
+		#end*/
 
 		output = new ArrayOutput(decoded);
 

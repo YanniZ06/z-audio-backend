@@ -1,19 +1,27 @@
 package zAudio;
 
+import SoundLoader.SoundInfo;
+
 class Sound {
+
+    //Backend
     /**
      * Handle for the connected ALSource and its various properties
      */
     var source:SourceHandle;
+    /**
+     * Handle for the connected Buffer and its various properties
+     */
     var buffer:BufferHandle;
     var device:ALDevice;
     var context:ALContext;
+    var sndInfo:SoundInfo;
 
     /**
-     * Loads in a new Sound object and returns it.
-     * TODO: Add parameter for quickloading???
+     * Loads in a new Sound object from the input `SoundInfo` and returns it.
+     * @param sndInfo The `SoundInfo` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
      */
-    public function new(sndInfo:SoundLoader.SoundInfo) {
+    public function new(sndInfo:SoundInfo) {
         source = new SourceHandle(AL.createSource());
 
         /*device = ALC.openDevice(null);

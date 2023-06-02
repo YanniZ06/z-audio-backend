@@ -82,10 +82,11 @@ class SoundLoader
 				function wait() { if(!decoder.processed) { Timer.delay(wait, 5); trace("Waited!"); } } //If somehow not processed and program continues execution, wait 5 ms
 				wait();
 
+				File.saveBytes("assets/snd/decodedSnd.wav", decoder.getWAV());
 				@:privateAccess
 				return {
-					format: resolveFormat(Decoder.calc_BitsPerSample(decoder.sampleRate, decoder.bitrate), decoder.channels),
-					data: resolveDataFromBytes(decoder.decoded.get_view().getData().bytes),
+					format: resolveFormat(decoder.bps * 4/*Decoder.calc_BitsPerSample(decoder.sampleRate, decoder.bitrate)*/, decoder.channels),
+					data: #if audio16 resolveDataFromBytes(decoder.decoded.getData().bytes) #else decoder.decoded #end,//.get_view().getData().bytes),
 					freq: decoder.sampleRate
 				}
 			case 'wav': throw "UNIMPLEMENTED!! (wav)";
@@ -109,5 +110,5 @@ class SoundLoader
 		return bitsPerSample <= 8 ? formats8[channels - 1] : formats16[channels - 1];
 
 	//This took stupidly long to figure out, sincerely fuck you lime for making ArrayBufferViews so hard to create
-	private static inline function resolveDataFromBytes(bytes:Bytes):ArrayBufferView return cast Int32Array.fromBytes(bytes);
+	private static inline function resolveDataFromBytes(bytes:Bytes):ArrayBufferView return Int32Array.fromBytes(bytes);
 }
