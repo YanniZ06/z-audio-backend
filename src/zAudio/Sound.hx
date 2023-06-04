@@ -1,6 +1,6 @@
 package zAudio;
 
-import SoundLoader.SoundInfo;
+import zAudio.SoundLoader.SoundInfo;
 
 class Sound {
 

@@ -63,7 +63,6 @@ private class ArrayOutput extends Output
 	public var position:Int = 0;
 
 	public function new(array:StoreArray)
-
 	{
 		this.array = array;
 	}
@@ -276,16 +275,45 @@ class Decoder
 
 		trace("Writing", n, "Samples");
 
-		for (i in 0...n)
-		{
-			#if audio16
-			output.writeInt16(nextSample());
-			#else
-			output.writeInt16(Std.int(nextSample() * 32767.0));
-			#end
+		var iteration:Int = 0;
+		try {
+			for (i in 0...3)
+			{
+				iteration++;
+				#if audio16
+				output.writeInt16(nextSample());
+				#else
+				output.writeInt16(Std.int(nextSample() * 32767.0));
+				#end
+			}
+		}
+		catch(e) {
+			trace('Error ($e), reached iteration $iteration!');
 		}
 
 		return output.getBytes();
+	}
+
+	/**
+	 * Encodes input `bytes` to WAV format with the help of channel, sampleRate, length and bitsPerSample info.
+	 * 
+	 * The returned bytes from this function can be saved to a .wav file manually using `File.saveBytes(returnedBytes);`.
+	 */
+	public static function getWAVfromInfo(channels:Int, sampleRate:Int, bitsPerSample:Int, length:Int, bytes:Bytes):Bytes {
+		var encoder:Decoder = new Decoder(bytes, true); //We need a decoder to use the WAV encoder built in
+
+		encoder.channels = channels;
+		encoder.length = length;
+		encoder.sampleRate = sampleRate;
+		@:privateAccess encoder.bps = bitsPerSample;
+
+		encoder.decoded = new StoreArray(length * channels);
+		encoder.decoded = StoreArray.fromBytes(bytes);
+		trace(encoder.decoded.length);
+		encoder.output = new ArrayOutput(encoder.decoded);
+		encoder.output.array = StoreArray.fromBytes(bytes);
+
+		return encoder.getWAV();
 	}
 
 	// Get a sample
@@ -303,6 +331,9 @@ class Decoder
 	// Nest Sample
 	public inline function nextSample()
 	{
+		trace(decoded[position]);
+		trace(decoded[++position]);
+		trace(decoded[3]);
 		return decoded[++position];
 	}
 
