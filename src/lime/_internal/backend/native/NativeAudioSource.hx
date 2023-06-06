@@ -123,15 +123,6 @@ class NativeAudioSource
 				if (parent.buffer.__srcBuffer != null)
 				{
 					AL.bufferData(parent.buffer.__srcBuffer, format, parent.buffer.data, parent.buffer.data.length, parent.buffer.sampleRate);
-					trace(format); //!!!!!!R
-					trace(parent.buffer.data);
-					trace(parent.buffer.data.length);
-					trace(parent.buffer.sampleRate);
-
-					var len:Int = Std.int(parent.buffer.data.length / (parent.buffer.channels * (parent.buffer.bitsPerSample / 8))); //Filter out pcmTotal :)
-					var wavBytes = 
-                        decoder.Decoder.getWAVfromInfo(parent.buffer.channels, parent.buffer.sampleRate, parent.buffer.bitsPerSample, len, parent.buffer.data.toBytes());
-					sys.io.File.saveBytes("assets/snd/recodedLimeSnd.wav", wavBytes);
 				}
 			}
 

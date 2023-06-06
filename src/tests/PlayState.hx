@@ -13,12 +13,12 @@ class PlayState extends FlxState
 	override public function create()
 	{
 		super.create();
-		trace(SoundLoader.fromFile("assets/snd/bell.ogg"));
-		var snd = new ZSound(SoundLoader.fromFile("assets/snd/bell.ogg"));
+		trace(SoundLoader.fromFile("assets/snd/demonize me.wav"));
+		var snd = new ZSound(SoundLoader.fromFile("assets/snd/demonize me.wav"));
 		snd.play();
 
-		var snd = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/bell.ogg"));
-		snd.play();
+		//var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/bell.ogg"));
+		//snd.play();
 	}
 
 	override public function update(elapsed:Float)

@@ -36,8 +36,8 @@ import haxe.io.Output;
 #if audio16
 import lime.utils.Int16Array as StoreArray;
 #else
-// import haxe.io.Float32Array as StoreArray;
-import lime.utils.UInt8Array as StoreArray;
+import haxe.io.Float32Array as StoreArray;
+//import lime.utils.UInt8Array as StoreArray;
 #end
 
 #if tink_await
@@ -81,8 +81,8 @@ private class ArrayOutput extends Output
 	#else
 	override function writeFloat(f:Float)
 	{
-		@:privateAccess array.__set(position++, Std.int(f));
-		//array[position++] = f;
+		//@:privateAccess array.__set(position++, Std.int(f));
+		array[position++] = f;
 	}
 	#end
 }
