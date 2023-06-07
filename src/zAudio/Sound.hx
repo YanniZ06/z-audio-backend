@@ -1,8 +1,8 @@
 package zAudio;
 
-import zAudio.SoundLoader.SoundInfo;
 import cpp.Pointer;
 import haxe.Timer;
+import zAudio.SoundLoader.SoundInfo;
 
 class Sound {
 

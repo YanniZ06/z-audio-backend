@@ -37,10 +37,6 @@
 
 	<haxelib name="flixel" />
 
-	<!-- __________________________ Set these as dependencies __________________________ -->
-	<haxelib name="stb_ogg_sound" />
-	<haxelib name="format" />
-
 	<!--In case you want to use the addons package-->
 	<!--<haxelib name="flixel-addons" />-->
 
