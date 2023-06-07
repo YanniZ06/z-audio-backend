@@ -1,6 +1,8 @@
 package zAudio;
 
 import zAudio.SoundLoader.SoundInfo;
+import cpp.Pointer;
+import haxe.Timer;
 
 class Sound {
 
@@ -13,20 +15,19 @@ class Sound {
      * Handle for the connected Buffer and its various properties
      */
     var buffer:BufferHandle;
-    var device:ALDevice;
-    var context:ALContext;
     var sndInfo:SoundInfo;
+
+    //public var playing(default, set):Bool = false;
+    public var length(default, null):Int = 0;
+	public var id(default, null):Pointer<Sound> = null;
 
     /**
      * Loads in a new Sound object from the input `SoundInfo` and returns it.
      * @param sndInfo The `SoundInfo` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
      */
     public function new(sndInfo:SoundInfo) {
+		id = Pointer.addressOf(this);
         source = new SourceHandle(AL.createSource());
-
-        /*device = ALC.openDevice(null);
-        context = ALC.createContext(device, null);
-        ALC.makeContextCurrent(context);*/
 
         //AL.getError();
         buffer = new BufferHandle(AL.createBuffer());
@@ -38,11 +39,22 @@ class Sound {
         AL.sourcePlay(source.handle);
     }
 
+    public function isSourcePlaying() {
+		return (AL.getSourcei(source.handle, AL.SOURCE_STATE) != AL.STOPPED);
+    }
+
     public function pause() {
         AL.sourcePause(source.handle);
     }
 
     public function stop() {
         AL.sourceStop(source.handle);
+    }
+
+    public function destroy() {
+		id = null;
+		sndInfo = null;
+		buffer = null;
+		source = null;
     }
 }
