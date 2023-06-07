@@ -7,8 +7,6 @@ import haxe.io.Bytes;
 import sys.io.File;
 import haxe.http.HttpBase;
 
-import decoder.Decoder;
-import decoder.WavDecoder;
 import lime.utils.ArrayBufferView;
 import lime._internal.backend.native.NativeCFFI;
 import lime.utils.UInt8Array;
@@ -75,37 +73,64 @@ class SoundLoader
 				throw 'Error, path "$path" does not point to a valid ogg or wav file!\nThe path should end with one of the given two extension names!';
 		}
 		final fileBytes = File.getBytes(path);
-		switch (type)
-		{
-			case 'ogg': //Lime already has an audio decoder so we might aswell use that and spare ourselves the ogg headache
-				#if (lime_cffi && !macro)
-				@:privateAccess {
-					var audioBuffer = new AudioBuffer();
-					audioBuffer.data = new UInt8Array(Bytes.alloc(0));
+		lastPath = path;
 
-					NativeCFFI.lime_audio_load_bytes(fileBytes, audioBuffer);
-					return {
-						format: resolveFormat(audioBuffer.bitsPerSample, audioBuffer.channels),
-						data: cast audioBuffer.data,
-						freq: audioBuffer.sampleRate
-					}
-				}
-				#end
-			case 'wav':
-				var decoder:WavDecoder = new WavDecoder(fileBytes, false);
-				@:privateAccess decoder.readAll();
-				function wait() { if(!decoder.processed) { Timer.delay(wait, 5); trace("Waited!"); } } //If somehow not processed and program continues execution, wait 5 ms
-				wait();
+		return Reflect.callMethod(SoundLoader, Reflect.field(SoundLoader, 'from_$type'), [fileBytes]);
+		//return null;
+	}
+	@:noPrivateAccess static var lastPath:String = "";
 
-				@:privateAccess
-				return {
-					format: resolveFormat(decoder.bps * 4 /*Decoder.calc_BitsPerSample(decoder.sampleRate, decoder.bitrate)*/, decoder.channels),
-					data: #if audio16 resolveDataFromBytes(decoder.decoded.getData().bytes) #else resolveDataFromBytes(decoder.decoded.getData().bytes) #end,
-					freq: decoder.sampleRate
-				}
+	public static function from_ogg(bytes:Bytes):SoundInfo {
+		#if (lime_cffi && !macro)
+		@:privateAccess {
+			var audioBuffer = new AudioBuffer();
+			audioBuffer.data = new UInt8Array(Bytes.alloc(0));
+
+			NativeCFFI.lime_audio_load_bytes(bytes, audioBuffer);
+			lastPath = "";
+			return {
+				format: resolveFormat(audioBuffer.bitsPerSample, audioBuffer.channels),
+				data: cast audioBuffer.data,
+				freq: audioBuffer.sampleRate
+			}
 		}
+		#end
+	}
 
-		return null;
+	public static function from_wav(bytes:Bytes):SoundInfo {
+		var input = new haxe.io.BytesInput(bytes);
+		final formatting:String = input.readString(4);
+		if (formatting != "RIFF") { //Would be funny
+			trace(formatting);
+			if (lastPath != "") throw 'INPUT DATA FROM PATH "$lastPath" IS NOT A VALID WAV SOUND!';
+			else throw 'INPUT BYTES HEADER DOES NOT INDICATE VALID TYPE "RIFF" (wav sound)!';
+		}
+		lastPath = "";
+		// Get all our infos from the WAV file (rapper gf got me onto a good start so if you see this, thank you :) )
+		// All input functions whichs values are kept unassigned are ones that we do not need, refer to this site as to what we're reading: https://docs.fileformat.com/audio/wav/
+		input.readInt32(); // size
+		input.readString(4); // "WAVE"
+		input.readString(4); // "fmt " (we read 4 because theres a trailing null)
+		input.readInt32(); // format data length
+		input.readInt16(); // format type
+
+		var channels = input.readInt16();
+		var samplingRate = input.readInt32();
+
+		input.readInt32(); // (Sample Rate * BitsPerSample * Channels) / 8. ???? what are you
+		input.readInt16(); // (BitsPerSample * Channels) / 8.1 - 8 bit mono2 - 8 bit stereo/16 bit mono4 - 16 bit stereo
+
+		var bitsPerSample = input.readInt16();
+		input.readString(4); // "data" marker
+		var len = input.readInt32();
+		var rawData = input.read(len);
+
+		@:privateAccess
+		return {
+			format: resolveFormat(bitsPerSample, channels),
+			data: resolveDataFromBytes(rawData),
+			freq: samplingRate
+		}
 	}
 
 	static final formats8 = [AL.FORMAT_MONO8, AL.FORMAT_STEREO8]; // ,4354
