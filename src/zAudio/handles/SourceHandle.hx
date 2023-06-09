@@ -76,8 +76,10 @@ class SourceHandle
 	}
 
 	/**
-	 * Gets rid of `this` SourceHandle.
+	 * Gets rid of `this` SourceHandle and renders it unuseable.
 	 * Also destroys the connected buffer in the process.
+	 * 
+	 * Memory will be cleared the next time the garbage collector is activated.
 	 */
 	public function destroy() {
 		if(buffer != null) detachBuffer();

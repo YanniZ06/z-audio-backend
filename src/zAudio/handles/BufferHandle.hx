@@ -1,28 +1,35 @@
 package zAudio.handles;
 
+import lime.utils.Int8Array;
+import lime.utils.ArrayBufferView;
+
 class BufferHandle
 {
 	public var handle:ALBuffer = null;
-	public var data:lime.utils.ArrayBufferView = null;
+	public var data:ArrayBufferView = null;
+	public var reverseData:ArrayBufferView = null;
 	public var dataLength(get, never):Int;
     function get_dataLength():Int { if(data == null) return 0; else return data.length;}
 	public var samples:Int = 0;
 	public var channels:Int = 0;
 	public var bitsPerSample:Int = 0;
 	public var sampleRate:Int = 0;
+	public var format:Int = AL.FORMAT_MONO8;
 	public var parentSource:SourceHandle = null;
 
 	public function new(buffer:ALBuffer) {
 		handle = buffer;
 	}
 
-	public function fill(channels:Int, bitsPerSample:Int, data:lime.utils.ArrayBufferView, sampleRate:Int):BufferHandle {
+	public function fill(channels:Int, bitsPerSample:Int, data:ArrayBufferView, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
 		this.channels = channels;
 		this.bitsPerSample = bitsPerSample;
 		this.data = data;
+		if(doPreloadReverseData) preloadReverseData(data);
 		this.sampleRate = sampleRate;
 
-		AL.bufferData(handle, resolveFormat(bitsPerSample, channels), data, dataLength, sampleRate);
+		format = resolveFormat(bitsPerSample, channels);
+		AL.bufferData(handle, format, data, dataLength, sampleRate);
 		samples = Std.int((dataLength * 8) / (channels * bitsPerSample));
 
 		@:privateAccess if(parentSource != null) {
@@ -33,6 +40,19 @@ class BufferHandle
 		return this;
 	}
 
+	public function preloadReverseData(raw:ArrayBufferView) {
+		var dataArr:Int8Array = cast raw;
+		var reversed:Int8Array = new Int8Array(dataArr.length);
+		@:privateAccess for(byteI in 0...dataArr.length) {
+			reversed.__set(byteI, dataArr.__get((dataArr.length - byteI))); //Set byte from back of data array to front of reversed array
+		}
+		reverseData = cast reversed;
+	}
+
+	/**
+	 * Destroys this Buffer and renders it unuseable.
+	 * Memory will be cleared the next time the garbage collector is activated.
+	 */
 	public function destroy() {
 		if(parentSource != null) parentSource.detachBuffer();
 		parentSource = null;
@@ -40,6 +60,7 @@ class BufferHandle
 		AL.deleteBuffer(handle);
 		handle = null;
 		data = null;
+		reverseData = null;
 	}
 	
 	/**
@@ -53,7 +74,8 @@ class BufferHandle
 	 */
 	public static function copyFrom(b2:BufferHandle):BufferHandle {
 		var b:BufferHandle = new BufferHandle(AL.createBuffer());
-		if(b2.data != null) b.fill(b2.channels, b2.bitsPerSample, b2.data, b2.sampleRate);
+		if(b2.data != null) b.fill(b2.channels, b2.bitsPerSample, b2.data, b2.sampleRate, false);
+		if(b2.reverseData != null) b.reverseData = b2.reverseData;
 
 		return b;
 	}

@@ -84,6 +84,21 @@ class SoundHandler {
     }
 
     /**
+     * Removes the sound `snd` from the memory entirely, creating space for other things.
+     * 
+     * This function renders the `snd` unuseable as it is destroyed.
+     * 
+     * This function will also automatically collect all other destroyed sounds (as it simply calls the garbage collector).
+     * 
+     * @param snd The snd you want to ensure is removed from memory.
+     */
+    public static function clearFromMemory(snd:Sound) {
+        snd.destroy();
+        cpp.vm.Gc.compact();
+        cpp.vm.Gc.run(true);
+    }
+
+    /**
      * Returns true if a sound stored at `path` is found in the cache, otherwise false.
      */
     public static function existsInCache(path:String):Bool return existingBufferData[path] != null;

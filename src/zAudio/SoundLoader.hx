@@ -1,6 +1,7 @@
 package zAudio;
 
 // import decoder.Mp3Decoder;
+import lime.utils.Int8Array;
 import lime.media.AudioBuffer;
 import haxe.Timer;
 import haxe.io.Bytes;
@@ -90,10 +91,36 @@ class SoundLoader
 		input.position += 4; // should be data marker
 		final len = input.readInt32();
 		final rawData = input.read(len);
-
 		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(channels, bitsPerSample, resolveDataFromBytes(rawData), samplingRate));
 		return BufferHandle.copyFrom(SoundHandler.existingBufferData[filePath]);
 	}
+
+	/*static function saveWav(buffer:BufferHandle) {
+		var casted:Int8Array = cast buffer.reverseData;
+		var bytes = casted.toBytes();
+
+		var output = new haxe.io.BytesOutput();
+		output.writeString("RIFF");
+		output.writeInt32(bytes.length * buffer.channels * 2);
+
+
+		input.readInt32(); // size
+		input.readString(4); // "WAVE"
+		input.readString(4); // "fmt " (we read 4 because theres a trailing null)
+		input.readInt32(); // format data length
+		input.readInt16(); // format type
+
+		var channels = input.readInt16();
+		var samplingRate = input.readInt32();
+
+		input.readInt32(); // (Sample Rate * BitsPerSample * Channels) / 8. ???? what are you
+		input.readInt16(); // (BitsPerSample * Channels) / 8.1 - 8 bit mono2 - 8 bit stereo/16 bit mono4 - 16 bit stereo
+
+		var bitsPerSample = input.readInt16();
+		input.readString(4); // "data" marker
+		var len = input.readInt32();
+		var rawData = input.read(len);
+	}*/
 
 	// -- Utility loading functions --
 

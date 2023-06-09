@@ -1,5 +1,7 @@
 package tests;
 
+import lime.media.openal.AL;
+import zAudio.handles.BufferHandle;
 import zAudio.SoundHandler;
 import flixel.util.FlxTimer;
 import openfl.media.Sound;
@@ -14,6 +16,7 @@ import flixel.FlxG;
 class PlayState extends FlxState
 {
 	var snd:ZSound;
+	var snd2:ZSound;
 	override public function create()
 	{
 		super.create();
@@ -21,11 +24,25 @@ class PlayState extends FlxState
 		// trace(soundInfo);
 		snd = new ZSound(soundInfo);
 
-		new FlxTimer().start(15, (_) -> {
+		snd2 = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
+		//snd2.time = snd2.length - 40;
+		snd2.reversed = true;
+		snd2.time = 6000;
+		snd2.play();
+		new FlxTimer().start(6, _ -> snd2.destroy());
+
+		/*var buffer = new BufferHandle(AL.createBuffer());
+
+		trace(snd.buffer.reverseData);
+		buffer.fill(snd.buffer.channels, snd.buffer.bitsPerSample, snd.buffer.reverseData, snd.buffer.sampleRate, false);
+		snd2 = new ZSound(buffer);
+		snd2.play();*/
+		
+		/*new FlxTimer().start(15, (_) -> {
 			snd.destroy();
 			snd = null;
 			SoundHandler.clear_bufferCache();
-		});
+		});*/
 
 		/*var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/inspected.ogg"));
 		snd_.play();
@@ -39,6 +56,10 @@ class PlayState extends FlxState
 	{
 		super.update(elapsed);
 
+		if(FlxG.keys.justPressed.C) {
+			SoundHandler.clear_bufferCache();
+			trace("CACHE HAS BEEN CLEARED!");
+		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
 		if(!snd.initialized) return;
@@ -46,7 +67,7 @@ class PlayState extends FlxState
 		FlxG.watch.addQuick("Sound Time:", snd.time);
 		FlxG.watch.addQuick("Pitch:", snd.pitch);
 		FlxG.watch.addQuick("Length:", snd.length);
-		FlxG.watch.addQuick("Done Playing:", snd.finished);
+		@:privateAccess FlxG.watch.addQuick("Done Playing:", snd.finished || snd.finishedReverse);
 		FlxG.watch.addQuick("Playing:", snd.playing);
 		FlxG.watch.addQuick("Volume:", snd.volume);
 		if(FlxG.keys.justPressed.S) snd.stop();
@@ -64,6 +85,13 @@ class PlayState extends FlxState
 		}
 		if(FlxG.keys.justPressed.V) {
 			snd.volume = Math.max(0, snd.volume + (0.1 * (mod * negMod)));
+		}
+		if(FlxG.keys.justPressed.R) {
+			snd.reversed = !snd.reversed;
+		}
+		if(FlxG.keys.justPressed.K) {
+			snd.destroy();
+			trace("SOUND HAS BEEN DESTROYED!");
 		}
 	}
 }
