@@ -87,9 +87,13 @@ class Sound {
      */
     public var time(get, set):Float;
     //public var id(default, null):Pointer<Sound> = null;
+    /**
+     * The `activeSounds` Map adress this sound is contained in.
+     */
+    public var cacheAddress:String = "";
 
     /**
-     * Loads in a new Sound object from the input buffer and returns it.
+     * Loads in a new Sound object from the filled input buffer and returns it.
      * @param inputBuffer The `BufferHandle` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
      */
     public function new(inputBuffer:BufferHandle) {
@@ -100,8 +104,12 @@ class Sound {
         timeGetter = timeGetRegular;
         timeSetter = timeSetRegular;
         onFinish = finishRegular;
+
+        @:privateAccess cacheAddress = inputBuffer.cacheAddress;
+        SoundHandler.activeSounds[cacheAddress].sounds.push(this);
     }
 
+    @:noCompletion var reverseChange:Bool = false;
     /**
      * Attaches a different buffer with different sound information to `this` sound object.
      * The general properties of this sound will be kept and load-times will potentially be faster, so this can be recommended instead of creating a new sound.
@@ -113,6 +121,16 @@ class Sound {
     public function changeBuffer(inputBuffer:BufferHandle) {
         source.detachBuffer();
         source.attachBuffer(inputBuffer);
+        if(!reverseChange) @:privateAccess changeCacheAddress(inputBuffer.cacheAddress);
+    }
+
+    function changeCacheAddress(newAddress:String) {
+        var curAddressPtr = SoundHandler.activeSounds[cacheAddress];
+        curAddressPtr.sounds.remove(this);
+        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) SoundHandler.activeSounds.remove(cacheAddress);
+        
+        cacheAddress = newAddress;
+        SoundHandler.activeSounds[newAddress].sounds.push(this);
     }
 
     /**
@@ -210,7 +228,10 @@ class Sound {
         final oldTime = time;
         var buf:BufferHandle = BufferHandle.copyFrom(buffer); //AL forced my hand, im so sorry. Nothing else worked. Really, I tried.
         AL.bufferData(buf.handle, buf.format, b ? buf.reverseData : buf.data, buf.dataLength, buf.sampleRate);
+
+        reverseChange = true; //Ensures we dont try changing the cache address
         changeBuffer(buf);
+        reverseChange = false;
 
         if(b) {
             timeGetter = timeGetReverse;
@@ -351,6 +372,12 @@ class Sound {
 	 * Memory will be cleared the next time the garbage collector is activated.
 	 */
     public function destroy() {
+        var curAddressPtr = SoundHandler.activeSounds[cacheAddress];
+        curAddressPtr.sounds.remove(this);
+        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) SoundHandler.activeSounds.remove(cacheAddress);
+        cacheAddress = null;
+        curAddressPtr = null;
+
         buffer.destroy();
         source.destroy();
         if(finishTimer != null) {

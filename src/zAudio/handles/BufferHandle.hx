@@ -21,6 +21,7 @@ class BufferHandle
 		handle = buffer;
 	}
 
+	@:noCompletion private var cacheAddress:String = "";
 	public function fill(channels:Int, bitsPerSample:Int, data:ArrayBufferView, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
 		this.channels = channels;
 		this.bitsPerSample = bitsPerSample;
@@ -61,6 +62,7 @@ class BufferHandle
 		handle = null;
 		data = null;
 		reverseData = null;
+		cacheAddress = null;
 	}
 	
 	/**

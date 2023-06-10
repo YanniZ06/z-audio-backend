@@ -22,14 +22,13 @@ class PlayState extends FlxState
 		super.create();
 		var soundInfo = SoundLoader.fromFile("assets/snd/wavTest.wav");
 		// trace(soundInfo);
-		snd = new ZSound(soundInfo);
-
-		snd2 = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
-		//snd2.time = snd2.length - 40;
-		snd2.reversed = true;
+		snd2 = new ZSound(soundInfo);
 		snd2.time = 6000;
 		snd2.play();
-		new FlxTimer().start(6, _ -> snd2.destroy());
+		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));
+
+		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
+		//snd2.time = snd2.length - 40;
 
 		/*var buffer = new BufferHandle(AL.createBuffer());
 
@@ -90,7 +89,7 @@ class PlayState extends FlxState
 			snd.reversed = !snd.reversed;
 		}
 		if(FlxG.keys.justPressed.K) {
-			snd.destroy();
+			SoundHandler.removeFromMemory(snd);
 			trace("SOUND HAS BEEN DESTROYED!");
 		}
 	}

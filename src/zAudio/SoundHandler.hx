@@ -5,11 +5,18 @@ import lime.ui.Window;
 import lime.media.AudioManager;
 import lime._internal.backend.native.NativeApplication;
 
+typedef SoundCache = {
+    var cacheExists:Bool;
+    var sounds:Array<Sound>;
+}
 /**
  * Class responsible for global sound handling and memory management.
  */
 class SoundHandler {
-    //public static var activeSounds:Array<Sound> = [];
+    /**
+     * All currently existing sounds mapped to their buffer-cache-name.
+     */
+    public static var activeSounds:Map<String, SoundCache> = [];
     /**
      * All preloaded Buffers mapped to their assigned files, to avoid duplicates.
      */
@@ -51,12 +58,17 @@ class SoundHandler {
     /**
      * Simply clears the entire `existingBufferData` cache, with the exception of all paths in `keepCacheSounds`.
      * 
+     * The memory for a cache will be cleared once all sounds using the cache have been destroyed.
+     * 
      * This function force-calls the garbage collector.
      */
     public static function clear_bufferCache():Void {
         for(n => buf in existingBufferData) {
             if(keepCacheSounds[n] != null) continue;
 
+            if(activeSounds[n].sounds.length < 1) activeSounds.remove(n);
+            else activeSounds[n].cacheExists = false;
+            
             existingBufferData.remove(n);
             buf.destroy();
             buf = null;
@@ -66,7 +78,7 @@ class SoundHandler {
     }
 
     /**
-     * Removes the sound stored at `path` from the cache.
+     * Removes the sound stored at `path` from the cache, clearing memory once no more sounds referencing the cache exist.
      * 
      * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
      * 
@@ -76,7 +88,9 @@ class SoundHandler {
      */
     public static function removeFromCache(path:String):Void {
         var buf = existingBufferData[path];
-        
+        if(activeSounds[path].sounds.length < 1) activeSounds.remove(path);
+        else activeSounds[path].cacheExists = false;
+
         if(keepCacheSounds[path] != null) keepCacheSounds.remove(path);
         existingBufferData.remove(path);
         buf.destroy();
@@ -84,16 +98,36 @@ class SoundHandler {
     }
 
     /**
-     * Removes the sound `snd` from the memory entirely, creating space for other things.
+     * Removes the sound `snd` and its associated cache from the memory entirely.
+     * 
+     * If other sounds with the same cache-address still exist, the memory will persist until they are destroyed.
      * 
      * This function renders the `snd` unuseable as it is destroyed.
      * 
-     * This function will also automatically collect all other destroyed sounds (as it simply calls the garbage collector).
-     * 
+     * This function force-calls the garbage collector.
      * @param snd The snd you want to ensure is removed from memory.
+     * @param destroyAll If true, `destroys` all other sounds with the same cache address.
+     * Only works if the cache address has not been cleared via `removeFromCache` or `clear_bufferCache`, throws otherwise, so use carefully!
      */
-    public static function clearFromMemory(snd:Sound) {
+    public static function removeFromMemory(snd:Sound, destroyAll:Bool = false) {
+        if(destroyAll) {
+            final address = snd.cacheAddress;
+            for(snd in activeSounds[snd.cacheAddress].sounds) {
+                snd.destroy();
+                snd = null;
+            }
+            activeSounds.remove(address);
+            if(existsInCache(address)) removeFromCache(address);
+
+            cpp.vm.Gc.compact();
+            cpp.vm.Gc.run(true);
+            return;
+        }
+
+        if(existsInCache(snd.cacheAddress)) removeFromCache(snd.cacheAddress);
         snd.destroy();
+        snd = null;
+
         cpp.vm.Gc.compact();
         cpp.vm.Gc.run(true);
     }
