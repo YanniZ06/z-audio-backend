@@ -224,6 +224,7 @@ class Sound {
         reversed = b;
         if(oldR == reversed) return b;
 
+        trace(b);
         final wasPlaying = playing;
         final oldTime = time;
         var buf:BufferHandle = BufferHandle.copyFrom(buffer); //AL forced my hand, im so sorry. Nothing else worked. Really, I tried.
@@ -267,7 +268,7 @@ class Sound {
         onFinish();
 
     function finishRegular() {
-        var timeRemaining = Std.int((length - time) / pitch);
+        var timeRemaining = Std.int((length - time) / pitch); //THIS ENSURES SOUND DOESNT STOP WHEN THE APP AUTOPAUSES
 		if(timeRemaining > 100 && AL.getSourcei(source.handle, AL.SOURCE_STATE) == AL.PLAYING)
 		{
 			setTimer(timeRemaining);
@@ -288,6 +289,13 @@ class Sound {
 
     //Name is kind of a lie, this just prevents regular finishing and stops the soun, seperate function incase we need to adjust things
     function finishReverse() {
+        var timeRemaining = Std.int(time / pitch); //THIS ENSURES IT DOESNT STOP WHEN THE APP AUTOPAUSES
+		if(timeRemaining > 100 && AL.getSourcei(source.handle, AL.SOURCE_STATE) == AL.PLAYING)
+		{
+			setTimer(timeRemaining);
+			return;
+		}
+
         finishedReverse = true;
         stop();
     }
@@ -337,6 +345,7 @@ class Sound {
         final totalOffset = Std.int(buffer.dataLength * ratio);
 
         AL.sourcei(source.handle, AL.BYTE_OFFSET, totalOffset);
+        trace(AL.getErrorString());
         if (playing) {
             AL.sourcePlay(source.handle);
 

@@ -22,11 +22,20 @@ class BufferHandle
 	}
 
 	@:noCompletion private var cacheAddress:String = "";
+	/**
+	 * Fills the buffer with informations about the sound. Can only be used once per handle and is only really used on the `SoundLoader`.
+	 * @param channels Channel Information
+	 * @param bitsPerSample Amount of bits per sample
+	 * @param data An ArrayBufferView consisting of the decoded sound-data bytes
+	 * @param sampleRate Samplerate Information
+	 * @param doPreloadReverseData If true, preloads the reverse sound information. Otherwise reverse sound data can be loaded using `preloadReverseData`
+	 * @return This buffer, for chaining purposes.
+	 */
 	public function fill(channels:Int, bitsPerSample:Int, data:ArrayBufferView, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
 		this.channels = channels;
 		this.bitsPerSample = bitsPerSample;
 		this.data = data;
-		if(doPreloadReverseData) preloadReverseData(data);
+		if(doPreloadReverseData) preloadReverseData();
 		this.sampleRate = sampleRate;
 
 		format = resolveFormat(bitsPerSample, channels);
@@ -41,13 +50,30 @@ class BufferHandle
 		return this;
 	}
 
-	public function preloadReverseData(raw:ArrayBufferView) {
-		var dataArr:Int8Array = cast raw;
+	/**
+	 * If the reverse data for this buffer has not been loaded yet, you can load it using this function.
+	 * 
+	 * If it has already been loaded regardless this function will be skipped automatically.
+	 */
+	public function preloadReverseData() {
+		if(reverseData != null) return;
+
+		var dataArr:Int8Array = cast data;
 		var reversed:Int8Array = new Int8Array(dataArr.length);
 		@:privateAccess for(byteI in 0...dataArr.length) {
 			reversed.__set(byteI, dataArr.__get((dataArr.length - byteI))); //Set byte from back of data array to front of reversed array
 		}
 		reverseData = cast reversed;
+
+		var curCache = SoundHandler.activeSounds[cacheAddress];
+		if(curCache == null) return;
+
+		curCache.hasReverseCache = true;
+		for(snd in curCache.sounds)
+			snd.buffer.reverseData = reverseData;
+		
+		var bufCache = SoundHandler.existingBufferData[cacheAddress];
+		if(bufCache != null) bufCache.reverseData = reverseData;
 	}
 
 	/**

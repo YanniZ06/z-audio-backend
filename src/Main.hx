@@ -11,6 +11,7 @@ class Main extends Sprite
 		super();
 		SoundHandler.init();
 
+		flixel.FlxG.autoPause = false;
 		addChild(new FlxGame(0, 0, tests.PlayState));
 	}
 }

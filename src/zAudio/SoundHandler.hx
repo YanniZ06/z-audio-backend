@@ -7,18 +7,29 @@ import lime._internal.backend.native.NativeApplication;
 
 typedef SoundCache = {
     var cacheExists:Bool;
+    var hasReverseCache:Bool;
     var sounds:Array<Sound>;
 }
 /**
  * Class responsible for global sound handling and memory management.
+ * 
+ * To easily get the path a Sound or Buffer is stored at (for functions that require them), use the sounds' `cacheAddress` field.
  */
 class SoundHandler {
     /**
-     * All currently existing sounds mapped to their buffer-cache-name.
+     * Current cache and active sounds mapped to their cache-address (names they were created under).
+     * 
+     * Sounds are stored in the caches "sounds" array.
+     * 
+     * Information about existing cached buffer data is defined by "cacheExists".
+     * 
+     * Information about existing reverse sound data is defined by "hasReverseCache".
      */
     public static var activeSounds:Map<String, SoundCache> = [];
     /**
      * All preloaded Buffers mapped to their assigned files, to avoid duplicates.
+     * 
+     * Holds no other relevant cache info.
      */
     public static var existingBufferData:Map<String, BufferHandle> = [];
     /**
@@ -29,8 +40,14 @@ class SoundHandler {
      * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
      * to prevent audio desyncing.
      */
-    private static inline var foc_lost_def:Bool = true;
+    private static inline var foc_lost_def:Bool = false; //!!!!!! SET TO TRUE
 	public static var focusLost_pauseSnd(default, set):Bool = foc_lost_def;
+
+    /**
+     * If true, reverse audio data is preloaded whenever a new sound is loaded in.
+     * Keeping this option on increases first-time audio load times, and doubles the memory each sound uses.
+     */
+    public static var preloadReverseSounds:Bool = true; //!!! set to false???
 
     private static var windowEvents:Map<String, Bool> = [];
 
@@ -60,7 +77,7 @@ class SoundHandler {
      * 
      * The memory for a cache will be cleared once all sounds using the cache have been destroyed.
      * 
-     * This function force-calls the garbage collector.
+     * This function force-calls the garbage collector and does a major collection.
      */
     public static function clear_bufferCache():Void {
         for(n => buf in existingBufferData) {
@@ -73,8 +90,8 @@ class SoundHandler {
             buf.destroy();
             buf = null;
         }
-        cpp.vm.Gc.compact();
         cpp.vm.Gc.run(true);
+        cpp.vm.Gc.compact();
     }
 
     /**
@@ -101,26 +118,26 @@ class SoundHandler {
      * Removes the sound `snd` and its associated cache from the memory entirely.
      * 
      * If other sounds with the same cache-address still exist, the memory will persist until they are destroyed.
+     * Use `destroyAll` to get rid of persisting memory.
      * 
      * This function renders the `snd` unuseable as it is destroyed.
      * 
-     * This function force-calls the garbage collector.
+     * This function also force-calls the garbage collector and does a minor collection.
      * @param snd The snd you want to ensure is removed from memory.
      * @param destroyAll If true, `destroys` all other sounds with the same cache address.
-     * Only works if the cache address has not been cleared via `removeFromCache` or `clear_bufferCache`, throws otherwise, so use carefully!
+     * Use carefully!
      */
     public static function removeFromMemory(snd:Sound, destroyAll:Bool = false) {
         if(destroyAll) {
             final address = snd.cacheAddress;
-            for(snd in activeSounds[snd.cacheAddress].sounds) {
-                snd.destroy();
-                snd = null;
+            for(snd__ in activeSounds[address].sounds) {
+                snd__.destroy();
+                snd__ = null;
             }
             activeSounds.remove(address);
             if(existsInCache(address)) removeFromCache(address);
 
-            cpp.vm.Gc.compact();
-            cpp.vm.Gc.run(true);
+            cpp.vm.Gc.run(false);
             return;
         }
 
@@ -128,15 +145,34 @@ class SoundHandler {
         snd.destroy();
         snd = null;
 
-        cpp.vm.Gc.compact();
-        cpp.vm.Gc.run(true);
+        cpp.vm.Gc.run(false);
     }
 
     /**
-     * Returns true if a sound stored at `path` is found in the cache, otherwise false.
+     * Removes and clears the reverse sound cache from all sounds with the cacheAddress of `path`.
+     * 
+     * If any sound with the cacheAddress is currently reversed, it will be un-reversed before-hand.
+     * 
+     * This function force calls the garbage collector and does a minor collection.
+     */
+    public static function removeReverseCacheFrom(path:String) {
+        for(snd in activeSounds[path].sounds) {
+            snd.reversed = false;
+            snd.buffer.reverseData = null;
+        }
+        var bufCache = existingBufferData[path];
+        if(bufCache != null) bufCache.reverseData = null;
+
+        cpp.vm.Gc.run(false);
+    }
+
+    /**
+     * Returns true if a buffer to a sound stored at `path` is found in the buffer-cache, otherwise false.
      */
     public static function existsInCache(path:String):Bool return existingBufferData[path] != null;
 
+
+    // -- SETTERS FOR OPTIONS THAT REQUIRE THEM --
     static function set_focusLost_pauseSnd(val:Bool):Bool {
 		final changed:Bool = focusLost_pauseSnd == val;
 		if (!changed) return val;
