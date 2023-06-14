@@ -104,6 +104,8 @@ class Sound {
         timeGetter = timeGetRegular;
         timeSetter = timeSetRegular;
         onFinish = finishRegular;
+        byteOffsetGetter = getByteOffset_Paused;
+        byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
         SoundHandler.activeSounds[cacheAddress].sounds.push(this);
@@ -151,6 +153,9 @@ class Sound {
         source.attachBuffer(buffer);
     }
 
+    var allowPlay:Bool = true;
+    var _preventPlay(get,never):Bool;
+    function get__preventPlay():Bool return (reversed && time == 0);
     /**
      * Plays the sound from its current time.
      * 
@@ -160,12 +165,17 @@ class Sound {
      * until the time value is higher than 0 or the sound is un-reversed.
      */
     public function play() {
-        if(playing) return;
+        if(!allowPlay) return;
 
         playing = true;
+        allowPlay = false;
 
         var setTime = finished ? 0 : time;
+        byteOffsetSetter = setByteOffset_Playing;
         time = setTime;
+
+        byteOffsetGetter = getByteOffset_Playing; //Make sure first time set gets paused byteOffset
+        paused = false;
     }
 
     /**
@@ -177,10 +187,26 @@ class Sound {
     public function pause() {
         if(!playing) return;
 
+        if(!_preventPlay) allowPlay = true;
+        setByteOffset_Paused(getByteOffset_Playing());
+
         finishTimer.stop();
         AL.sourcePause(source.handle);
         playing = false;
+
+        byteOffsetSetter = setByteOffset_Paused;
+        byteOffsetGetter = getByteOffset_Paused;
         paused = true;
+    }
+
+    function switchPlaying() {
+        byteOffsetGetter = !playing ? getByteOffset_Paused : getByteOffset_Playing;
+        byteOffsetSetter = !playing ? setByteOffset_Paused : setByteOffset_Playing;
+        /*if(playing) { //Uncomment if all else fails
+            AL.sourcePlay(source.handle);
+            setByteOffset_Playing(getByteOffset_Paused()); //Cannot set the byte offset on non-playing sources, I hate this
+            AL.sourcePause(source.handle);
+        }*/
     }
 
     /**
@@ -197,7 +223,12 @@ class Sound {
         finishTimer.stop();
         timesLooped = 0;
         playing = paused = false;
+        allowPlay = true;
         time = 0;
+
+        byteOffsetSetter = setByteOffset_Paused;
+        byteOffsetGetter = getByteOffset_Paused;
+        setByteOffset_Paused(1);
     }
 
     function get_looping():Bool return AL.getSourcei(source.handle, AL.LOOPING) == AL.TRUE ? true : false;
@@ -224,11 +255,12 @@ class Sound {
         reversed = b;
         if(oldR == reversed) return b;
 
-        trace(b);
         final wasPlaying = playing;
         final oldTime = time;
+
         var buf:BufferHandle = BufferHandle.copyFrom(buffer); //AL forced my hand, im so sorry. Nothing else worked. Really, I tried.
-        AL.bufferData(buf.handle, buf.format, b ? buf.reverseData : buf.data, buf.dataLength, buf.sampleRate);
+        var data = b ? buf.reverseData : buf.data;
+        AL.bufferData(buf.handle, buf.format, data, buf.dataLength, buf.sampleRate);
 
         reverseChange = true; //Ensures we dont try changing the cache address
         changeBuffer(buf);
@@ -243,10 +275,16 @@ class Sound {
             timeGetter = timeGetRegular;
             timeSetter = timeSetRegular;
             onFinish = finishRegular;
+            allowPlay = !wasPlaying;
+            finishedReverse = false;
         }
         
         playing = wasPlaying;
+
+        byteOffsetSetter = playing ? setByteOffset_Playing : setByteOffset_Paused;
         time = oldTime;
+
+        byteOffsetGetter = playing ? getByteOffset_Playing : getByteOffset_Paused;
 
         return b;
     }
@@ -298,6 +336,7 @@ class Sound {
 
         finishedReverse = true;
         stop();
+        allowPlay = false; //Avoid reverse audio glitch :)
     }
 
     var timeGetter:Void -> Float;
@@ -307,11 +346,11 @@ class Sound {
     function timeGetRegular():Float {
         if(finished) return length;
 
-        var offset = AL.getSourcei(source.handle, AL.BYTE_OFFSET);
+        var offset = byteOffsetGetter();
         var ratio = (offset / buffer.dataLength);
         var totalSeconds = buffer.samples / buffer.sampleRate;
 
-        var time_ = Std.int(totalSeconds * ratio * 1000);// - parent.offset;
+        var time_ = Std.int(totalSeconds * ratio * 1000);
         return time_;
     }
 
@@ -329,6 +368,18 @@ class Sound {
         return val;
     }
 
+    var pause_offset:Int = 1;
+    var byteOffsetSetter:Int -> Void;
+    var byteOffsetGetter:Void -> Int;
+    function setByteOffset_Playing(val:Int) {
+        AL.sourcei(source.handle, AL.BYTE_OFFSET, val);
+        pause_offset = val;
+    }
+    function setByteOffset_Paused(val:Int) pause_offset = val;
+    function getByteOffset_Playing() return AL.getSourcei(source.handle, AL.BYTE_OFFSET);
+    function getByteOffset_Paused() return pause_offset;
+
+
     function timeSetRegular(val:Float) {
         if(val > length - 10) {
             finishSound();
@@ -344,8 +395,7 @@ class Sound {
         final ratio = (secondOffset / totalSeconds);
         final totalOffset = Std.int(buffer.dataLength * ratio);
 
-        AL.sourcei(source.handle, AL.BYTE_OFFSET, totalOffset);
-        trace(AL.getErrorString());
+        byteOffsetSetter(totalOffset);
         if (playing) {
             AL.sourcePlay(source.handle);
 
@@ -367,7 +417,7 @@ class Sound {
         final ratio = (secondOffset / totalSeconds);
         final totalOffset = Std.int(buffer.dataLength * ratio);
 
-        AL.sourcei(source.handle, AL.BYTE_OFFSET, totalOffset);
+        byteOffsetSetter(totalOffset);
         if (playing) {
             AL.sourcePlay(source.handle);
 

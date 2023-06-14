@@ -28,7 +28,7 @@ class PlayState extends FlxState
 		new FlxTimer().start(6, _ -> SoundHandler.removeReverseCacheFrom(snd2.cacheAddress));
 
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
-		snd.time = snd.length - (10000);
+		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
 		/*var buffer = new BufferHandle(AL.createBuffer());
