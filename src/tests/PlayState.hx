@@ -89,6 +89,9 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.R) {
 			snd.reversed = !snd.reversed;
 		}
+		if(FlxG.keys.justPressed.L) {
+			snd.lowpass.enabled = !snd.lowpass.enabled;
+		}
 		if(FlxG.keys.justPressed.K) {
 			//SoundHandler.removeFromMemory(snd);
 			SoundHandler.removeReverseCacheFrom(snd.cacheAddress);

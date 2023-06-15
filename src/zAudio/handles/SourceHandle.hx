@@ -6,10 +6,8 @@ package zAudio.handles;
 class SourceHandle
 {
 	public var handle:ALSource = null;
-	public var connectedAux:Map<Int, AuxSlotHandle> = [];
 	public var buffer:BufferHandle = null;
 	public var parentSound:Sound = null;
-	public var auxCount:Int = 0; // To determine which aux_filter to get rid of lol!!
 	public var hasFilter:Bool = false;
 
 	public function new(?hndl:ALSource, parentSound:Sound)
@@ -18,22 +16,12 @@ class SourceHandle
 		this.parentSound = parentSound;
 	}
 
+	/**
+	 * Effect Utility Function to get rid of an Auxilary Effect Slot connected to the source
+	 * @param id The ID of the auxilary slot to remove
+	 */
 	public function onAuxRemove(id:Int)
-	{
-		connectedAux.remove(id);
 		AL.removeSend(handle, id);
-
-		for (id_ => aux in connectedAux)
-		{
-			if (id_ >= id)
-				continue;
-
-			connectedAux.remove(id_);
-			aux.auxID = id_;
-			connectedAux.set(id_ - 1, aux);
-		}
-		auxCount--;
-	}
 
 	/**
 	 * Attaches a buffer to this `source`.
@@ -84,7 +72,7 @@ class SourceHandle
 	public function destroy() {
 		if(buffer != null) detachBuffer();
 		AL.deleteSource(handle);
-
+		
 		parentSound.source = null;
 		parentSound.initialized = false; //Should be false eitherway but just making sure
 		parentSound = null;

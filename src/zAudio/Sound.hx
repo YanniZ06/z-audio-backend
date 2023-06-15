@@ -92,6 +92,10 @@ class Sound {
      */
     public var cacheAddress:String = "";
 
+    //EFFECTS
+    //FILTERS
+    public var lowpass:zAudio.filters.LowpassFilter;
+
     /**
      * Loads in a new Sound object from the filled input buffer and returns it.
      * @param inputBuffer The `BufferHandle` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
@@ -108,6 +112,7 @@ class Sound {
         byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
+        lowpass = new zAudio.filters.LowpassFilter(this);
         SoundHandler.activeSounds[cacheAddress].sounds.push(this);
     }
 
@@ -437,6 +442,7 @@ class Sound {
         cacheAddress = null;
         curAddressPtr = null;
 
+        lowpass.destroy();
         buffer.destroy();
         source.destroy();
         if(finishTimer != null) {
