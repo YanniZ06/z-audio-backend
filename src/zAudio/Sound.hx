@@ -69,8 +69,21 @@ class Sound {
 
     /**
      * The current gain/volume of the sound, should be positive to avoid errors.
+     * 
+     * The maximum applyable volume is defined by `maxVolume`.
      */
     public var volume(get, set):Float;
+
+    /**
+     * The highest value `volume` can have until it doesnt affect the actual gain of the sound anymore.
+     *
+     * Should be positive to avoid errors.
+     * 
+     * This feature might not always work as intended if set to decently high values.
+     */
+    public var maxVolume(get, set):Float;
+
+    private var actualVolume:Float = 1;
     /**
      * Whether this sound should loop or not.
      */
@@ -249,12 +262,20 @@ class Sound {
         setTimer(timeRemaining);
         return val;
     }
-    function get_volume():Float return AL.getSourcef(source.handle, AL.GAIN);
+    function get_volume():Float return actualVolume;
     function set_volume(val:Float):Float {
-        AL.sourcef(source.handle, AL.GAIN, val);
+        actualVolume = val;
+        AL.sourcef(source.handle, AL.GAIN, val * SoundHandler.globalVolume);
         return val;
     }
 
+    function get_maxVolume():Float return AL.getSourcef(source.handle, AL.MAX_GAIN);
+    function set_maxVolume(val:Float):Float {
+        AL.sourcef(source.handle, AL.MAX_GAIN, val);
+        return val;
+    }
+
+    var regularWasFinished:Bool = false;
     function set_reversed(b:Bool):Bool {
         final oldR = reversed;
         reversed = b;
@@ -275,6 +296,8 @@ class Sound {
             timeGetter = timeGetReverse;
             timeSetter = timeSetReverse;
             onFinish = finishReverse;
+            regularWasFinished = finished;
+            finished = false;
         }
         else {
             timeGetter = timeGetRegular;
@@ -282,6 +305,7 @@ class Sound {
             onFinish = finishRegular;
             allowPlay = !wasPlaying;
             finishedReverse = false;
+            finished = regularWasFinished;
         }
         
         playing = wasPlaying;

@@ -31,12 +31,14 @@ class FilterBase extends FXBase {
 		enabled = val;
 		if(oldE == enabled) return val;
 
-		if(enabled) AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter);
+		if(enabled) reapplyFilter();
 		else AL.removeDirectFilter(sourceRef.handle);
 		sourceRef.hasFilter = enabled;
 
 		return val;
 	}
+
+	function reapplyFilter():Void AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter);
 
 	public static function makeFilter(type:ALFilterType):ALFilter {
 		var fl = AL.createFilter();

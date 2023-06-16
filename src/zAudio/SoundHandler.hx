@@ -47,7 +47,14 @@ class SoundHandler {
      * If true, reverse audio data is preloaded whenever a new sound is loaded in.
      * Keeping this option on increases first-time audio load times, and doubles the memory each sound uses.
      */
-    public static var preloadReverseSounds:Bool = true; //!!! set to false???
+    public static var preloadReverseSounds:Bool = false;
+
+    /**
+     * A volume modifier that gets applied to all sounds.
+     * 
+     * Useful for setting master audio volume in your game!
+     */
+    public static var globalVolume(default, set):Float = 1;
 
     private static var windowEvents:Map<String, Bool> = [];
 
@@ -173,6 +180,11 @@ class SoundHandler {
 
 
     // -- SETTERS FOR OPTIONS THAT REQUIRE THEM --
+    static function set_globalVolume(vol:Float):Float {
+        globalVolume = vol;
+        for(cache in activeSounds) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
+        return vol;
+    }
     static function set_focusLost_pauseSnd(val:Bool):Bool {
 		final changed:Bool = focusLost_pauseSnd == val;
 		if (!changed) return val;

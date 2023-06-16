@@ -28,6 +28,8 @@ class PlayState extends FlxState
 		new FlxTimer().start(6, _ -> SoundHandler.removeReverseCacheFrom(snd2.cacheAddress));
 
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
+		snd.lowpass.enabled = true;
+		snd.maxVolume = 10;
 		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
@@ -90,7 +92,7 @@ class PlayState extends FlxState
 			snd.reversed = !snd.reversed;
 		}
 		if(FlxG.keys.justPressed.L) {
-			snd.lowpass.enabled = !snd.lowpass.enabled;
+			snd.lowpass.gain_lf = Math.min(1, Math.max(0, snd.lowpass.gain_lf + ((0.033 * negMod) * mod)));
 		}
 		if(FlxG.keys.justPressed.K) {
 			//SoundHandler.removeFromMemory(snd);

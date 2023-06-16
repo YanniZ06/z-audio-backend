@@ -4,13 +4,15 @@ import zAudio.FilterBase.ALFilterType;
 
 class LowpassFilter extends FilterBase {
     /**
-     * The overall gain of the lowpass filter.
+     * The overall gain of the source, 1 means its unaffected by the lowpass.
+     * 
+     * This does practically the same as setting the sounds volume, use `gain_lf` to only filter the lower frequencies.
      * 
      * Must be a number between 0 and 1.
      */
     public var gain(default, set):Float = 1.0;
     /**
-     * The gain of the lowpass filter on lower frequencies specifically.
+     * The gain of lower frequencies on the source specifically, 1 means they're unaffected by the lowpass.
      * 
      * Must be a number between 0 and 1.
      */
@@ -22,13 +24,17 @@ class LowpassFilter extends FilterBase {
 
     function set_gain(val:Float):Float {
         gain = val;
-        AL.filterf(filter, LowpassParams.LOWPASS_GAIN, val);
+        AL.filterf(filter, LowpassParam.LOWPASS_GAIN, val);
+        if(enabled) reapplyFilter();
+
         return val;
     }
 
     function set_gain_lf(val:Float):Float {
         gain_lf = val;
-        AL.filterf(filter, LowpassParams.LOWPASS_GAINHF, val);
+        AL.filterf(filter, LowpassParam.LOWPASS_GAINHF, val);
+        if(enabled) reapplyFilter();
+
         return val;
     }
 }
@@ -36,7 +42,7 @@ class LowpassFilter extends FilterBase {
 /**
  * Lowpass filter parameters
  */
-enum abstract LowpassParams(Int) from Int to Int {
-	public static inline var LOWPASS_GAIN:LowpassParams = 0x0001; /*Not exactly a lowpass. Apparently it's a shelf*/
-	public static inline var LOWPASS_GAINHF:LowpassParams = 0x0002;
+enum abstract LowpassParam(Int) from Int to Int {
+	public static inline var LOWPASS_GAIN:LowpassParam = 0x0001; /*Not exactly a lowpass. Apparently it's a shelf*/
+	public static inline var LOWPASS_GAINHF:LowpassParam = 0x0002;
 }
