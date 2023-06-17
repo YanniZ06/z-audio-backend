@@ -1,17 +1,18 @@
 package tests;
 
-import lime.media.openal.AL;
-import zAudio.handles.BufferHandle;
-import zAudio.SoundHandler;
-import flixel.util.FlxTimer;
-import openfl.media.Sound;
-import flixel.system.ui.FlxSoundTray;
+import flixel.FlxG;
+import flixel.FlxState;
 import flixel.system.FlxAssets.FlxSoundAsset;
 import flixel.system.FlxSound;
-import flixel.FlxState;
-import zAudio.SoundLoader;
+import flixel.system.ui.FlxSoundTray;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import lime.media.openal.AL;
+import openfl.media.Sound;
 import zAudio.Sound as ZSound;
-import flixel.FlxG;
+import zAudio.SoundHandler;
+import zAudio.SoundLoader;
+import zAudio.handles.BufferHandle;
 
 class PlayState extends FlxState
 {
@@ -30,6 +31,14 @@ class PlayState extends FlxState
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
 		snd.lowpass.enabled = true;
 		snd.maxVolume = 10;
+
+		function loop_low() {
+			var twn:FlxTween;
+			twn = FlxTween.tween(snd, {"lowpass.gain_hf": 0.1}, 2, {onComplete: (_) -> {
+				twn = FlxTween.tween(snd, {"lowpass.gain_hf": 1}, 2, {onComplete: (_) -> loop_low()});
+			}});
+		}
+		loop_low();
 		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
@@ -92,7 +101,7 @@ class PlayState extends FlxState
 			snd.reversed = !snd.reversed;
 		}
 		if(FlxG.keys.justPressed.L) {
-			snd.lowpass.gain_lf = Math.min(1, Math.max(0, snd.lowpass.gain_lf + ((0.033 * negMod) * mod)));
+			snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
 		}
 		if(FlxG.keys.justPressed.K) {
 			//SoundHandler.removeFromMemory(snd);

@@ -1,9 +1,25 @@
 package zAudio;
 
 //import cpp.vm.Gc;
-import cpp.Pointer;
+//import cpp.Pointer;
 import haxe.Timer;
+import zAudio.filters.*;
 
+/**
+ * The primary zAudio Sound object, coming with all sorts of useful properties.
+ * 
+ * To use the raw OpenAL source make use of the `source` and `buffer` variables aswell as some of the buffer
+ * and source changing functions this class provides.
+ * 
+ * Both filters and effects need to be enabled manually using the `enabled` field they all come with.
+ * 
+ * You may only have `one` filter applied to the sound at once, if you enable another one while one is already enabled,
+ * that one is overwritten by the newly enabled filter.
+ * 
+ * You may use as many sound effects at once as you want.
+ * 
+ * To find out more about filter and effect properties, visit the `API Documentation`.
+ */
 class Sound {
     var finishTimer:Timer;
     /**
@@ -46,7 +62,7 @@ class Sound {
     /**
      * If true, reverses sound playback.
      * 
-     * Setting this to true will throw if the Buffer hasnt been allowed to load reverse data yet.
+     * Setting this to true will give unexpected results if the Buffer hasnt been allowed to load reverse data yet.
      * 
      * If this is the case, call `buffer.preloadReverseData()`!
      */
@@ -99,7 +115,6 @@ class Sound {
      * The current position of the song, in milliseconds.
      */
     public var time(get, set):Float;
-    //public var id(default, null):Pointer<Sound> = null;
     /**
      * The `activeSounds` Map adress this sound is contained in.
      */
@@ -107,7 +122,25 @@ class Sound {
 
     //EFFECTS
     //FILTERS
-    public var lowpass:zAudio.filters.LowpassFilter;
+    /**
+     * The lowpass on this sound.
+     * 
+     * Check `LowpassFilter` for more precise documentation
+     */
+    public var lowpass:LowpassFilter;
+    /**
+     * The highpass on this sound.
+     * 
+     * Check `HighpassFilter` for more precise documentation
+     */
+    public var highpass:HighpassFilter;
+    /**
+     * A bandpass filter, practically a combination of `highpass` and `lowpass`.
+     * 
+     * Check `BandpassFilter` for more precise documentation
+     */
+    public var bandpass:BandpassFilter;
+    private var activeFilter:Dynamic = null;
 
     /**
      * Loads in a new Sound object from the filled input buffer and returns it.
@@ -125,14 +158,19 @@ class Sound {
         byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
-        lowpass = new zAudio.filters.LowpassFilter(this);
+        lowpass = new LowpassFilter(this);
+        highpass = new HighpassFilter(this);
+        bandpass = new BandpassFilter(this);
+
         SoundHandler.activeSounds[cacheAddress].sounds.push(this);
     }
 
     @:noCompletion var reverseChange:Bool = false;
     /**
      * Attaches a different buffer with different sound information to `this` sound object.
-     * The general properties of this sound will be kept and load-times will potentially be faster, so this can be recommended instead of creating a new sound.
+     * 
+     * The general properties of this sound (such as pitch) 
+     * will be kept and load-times will potentially be faster, so this can be recommended instead of creating a new sound.
      * 
      * If initialized is `false`, this function will most likely fail.
      * A check is not necessary however, as this will only be the case if the buffer has been manually detached from the source before.
@@ -154,16 +192,13 @@ class Sound {
     }
 
     /**
-     * Attaches a different source with different playback information ()
-     * TODO: CONTINUE THIS DOCUMENTATION
-     * !
-     * !
-     * !
-     * !
-     * !
-     * !
-     * !
-     * @param inputSource 
+     * Attaches a different source with different playback information (such as pitch, position data etc) to `this` sound object.
+     * 
+     * This stops the currently playing sound, destroys the source along with its attached buffer and will throw if there currently is no source attached to this sound.
+     * 
+     * If you intend to keep the sound playing, store the time value before calling this function, then after calling
+     * the function use `source.attachBuffer` with the buffer that holds the info of the current sound and finally call `play`.
+     * @param inputSource The source to replace `this` sounds old source with.
      */
     public function changeSource(inputSource:SourceHandle) {
         source.destroy();

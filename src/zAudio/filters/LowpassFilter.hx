@@ -2,21 +2,24 @@ package zAudio.filters;
 
 import zAudio.FilterBase.ALFilterType;
 
+/**
+ * A filter representing a lowpass (or shelf).
+ */
 class LowpassFilter extends FilterBase {
     /**
      * The overall gain of the source, 1 means its unaffected by the lowpass.
      * 
-     * This does practically the same as setting the sounds volume, use `gain_lf` to only filter the lower frequencies.
+     * This does practically the same as setting the sounds volume, use `gain_hf` to only filter the lower frequencies.
      * 
      * Must be a number between 0 and 1.
      */
     public var gain(default, set):Float = 1.0;
     /**
-     * The gain of lower frequencies on the source specifically, 1 means they're unaffected by the lowpass.
+     * The gain of higher frequencies on the source specifically, 1 means they're unaffected by the lowpass.
      * 
      * Must be a number between 0 and 1.
      */
-    public var gain_lf(default, set):Float = 1.0;
+    public var gain_hf(default, set):Float = 1.0;
 
     public function new(sndRef:Sound) {
         super(sndRef, ALFilterType.FILTER_LOWPASS);
@@ -30,8 +33,8 @@ class LowpassFilter extends FilterBase {
         return val;
     }
 
-    function set_gain_lf(val:Float):Float {
-        gain_lf = val;
+    function set_gain_hf(val:Float):Float {
+        gain_hf = val;
         AL.filterf(filter, LowpassParam.LOWPASS_GAINHF, val);
         if(enabled) reapplyFilter();
 

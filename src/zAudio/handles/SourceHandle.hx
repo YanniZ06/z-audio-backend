@@ -45,7 +45,7 @@ class SourceHandle
 	}
 
 	/**
-	 * Detaches the buffer connected to this source and automatically destroys the sound associated with it.
+	 * Detaches the buffer connected to this source and automatically stops the sound associated with it.
 	 * 
 	 * If no buffer has been connected via `attachBuffer`, this function will most likely fail.
 	 */

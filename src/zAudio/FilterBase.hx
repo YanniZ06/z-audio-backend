@@ -7,7 +7,9 @@ class FilterBase extends FXBase {
 	/**
 	 * Controls whether this Filter should be enabled right now or not.
 	 */
-	public var enabled(default, set):Bool = false;
+	public var enabled(get, set):Bool;
+	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and using unnecessary time to call an AL operation when disabling another filter
+
 	private var filter:ALFilter = null;
 
 	private function new(sndRef:Sound, type:ALFilterType) {
@@ -27,16 +29,27 @@ class FilterBase extends FXBase {
 	}
 
 	function set_enabled(val:Bool):Bool {
-		final oldE = enabled;
-		enabled = val;
-		if(oldE == enabled) return val;
+		final oldE = enabled_;
+		enabled_ = val;
+		if(oldE == enabled_) return val;
 
-		if(enabled) reapplyFilter();
-		else AL.removeDirectFilter(sourceRef.handle);
+		if(enabled_) { 
+			reapplyFilter();
+			@:privateAccess {
+				_snd.activeFilter.enabled_ = false;
+				_snd.activeFilter = this;
+			}
+		}
+		else {
+			AL.removeDirectFilter(sourceRef.handle);
+			@:privateAccess _snd.activeFilter = null;
+		}
 		sourceRef.hasFilter = enabled;
 
 		return val;
 	}
+
+	function get_enabled():Bool return enabled_;
 
 	function reapplyFilter():Void AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter);
 
@@ -86,18 +99,4 @@ enum abstract AssignedAuxSlot_Filter(Int) from Int to Int {
 	public static inline var FILTER_LOWPASS:AssignedAuxSlot_Filter = 13;
 	public static inline var FILTER_HIGHPASS:AssignedAuxSlot_Filter = 14;
 	public static inline var FILTER_BANDPASS:AssignedAuxSlot_Filter = 15;
-}
-
-/**
- * An abstract representing all the AL filter specific parameters.
- * TODO: Seperate these all
-*/
-enum abstract ALFilterParam(Int) from Int to Int {
-	/* Highpass filter parameters */
-	public static inline var HIGHPASS_GAIN:ALFilterParam = 0x0001;
-	public static inline var HIGHPASS_GAINLF:ALFilterParam = 0x0002;
-	/* Bandpass filter parameters */
-	public static inline var BANDPASS_GAIN:ALFilterParam = 0x0001;
-	public static inline var BANDPASS_GAINLF:ALFilterParam = 0x0002;
-	public static inline var BANDPASS_GAINHF:ALFilterParam = 0x0003;
 }
