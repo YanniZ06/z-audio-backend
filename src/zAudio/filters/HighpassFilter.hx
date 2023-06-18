@@ -2,6 +2,13 @@ package zAudio.filters;
 
 import zAudio.FilterBase.ALFilterType;
 
+/**
+ * A filter representing a highpass.
+ * 
+ * Can be used to make audio sound more robotic-ish.
+ * 
+ * Lower values strengthen the highpass effect.
+ */
 class HighpassFilter extends FilterBase {
     /**
      * The overall gain of the source, 1 means its unaffected by the highpass.
@@ -18,6 +25,10 @@ class HighpassFilter extends FilterBase {
      */
     public var gain_lf(default, set):Float = 1.0;
 
+    /**
+     * Loads in a new highpass filter and attaches it to the `sndRef`.
+     * @param sndRef The sound to attach the filter to.
+     */
     public function new(sndRef:Sound) {
         super(sndRef, ALFilterType.FILTER_HIGHPASS);
     }

@@ -3,7 +3,6 @@ package zAudio;
 //import cpp.vm.Gc;
 //import cpp.Pointer;
 import haxe.Timer;
-import zAudio.filters.*;
 
 /**
  * The primary zAudio Sound object, coming with all sorts of useful properties.
@@ -20,7 +19,7 @@ import zAudio.filters.*;
  * 
  * To find out more about filter and effect properties, visit the `API Documentation`.
  */
-class Sound {
+class Sound extends SoundFXLoader implements SoundBaseI{
     var finishTimer:Timer;
     /**
      * Handle for the connected ALSource and its various properties.
@@ -120,28 +119,6 @@ class Sound {
      */
     public var cacheAddress:String = "";
 
-    //EFFECTS
-    //FILTERS
-    /**
-     * The lowpass on this sound.
-     * 
-     * Check `LowpassFilter` for more precise documentation
-     */
-    public var lowpass:LowpassFilter;
-    /**
-     * The highpass on this sound.
-     * 
-     * Check `HighpassFilter` for more precise documentation
-     */
-    public var highpass:HighpassFilter;
-    /**
-     * A bandpass filter, practically a combination of `highpass` and `lowpass`.
-     * 
-     * Check `BandpassFilter` for more precise documentation
-     */
-    public var bandpass:BandpassFilter;
-    private var activeFilter:Dynamic = null;
-
     /**
      * Loads in a new Sound object from the filled input buffer and returns it.
      * @param inputBuffer The `BufferHandle` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
@@ -158,11 +135,11 @@ class Sound {
         byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
-        lowpass = new LowpassFilter(this);
-        highpass = new HighpassFilter(this);
-        bandpass = new BandpassFilter(this);
+        loadFX(this);
 
         SoundHandler.activeSounds[cacheAddress].sounds.push(this);
+        finishTimer = new Timer(500); //Avoid a null ref when destroying sound that hasnt been played once (whyever you'd do that)
+        finishTimer.stop();
     }
 
     @:noCompletion var reverseChange:Bool = false;

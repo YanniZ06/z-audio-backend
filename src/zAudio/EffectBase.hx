@@ -8,7 +8,12 @@ class EffectBase extends FXBase {
 
 	private var effect:ALEffect = null;
 	private var aux:AuxSlotHandle = null;
-	 
+
+	/**
+     * Loads in an ALFilter of type `type` and attaches it to the `sndRef`.
+     * @param sndRef The sound to attach the filter to.
+	 * @param type The type of ALFilter you want to attach to the sound.
+     */
 	private function new(sndRef:Sound, type:ALEffectType) {
 		super(sndRef);
 		effect = makeEffect(type);

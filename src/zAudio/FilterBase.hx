@@ -12,6 +12,11 @@ class FilterBase extends FXBase {
 
 	private var filter:ALFilter = null;
 
+	/**
+     * Loads in an ALFilter of type `type` and attaches it to the `sndRef`.
+     * @param sndRef The sound to attach the filter to.
+	 * @param type The type of ALFilter you want to attach to the sound.
+     */
 	private function new(sndRef:Sound, type:ALFilterType) {
 		super(sndRef);
 		filter = makeFilter(type);
@@ -36,7 +41,7 @@ class FilterBase extends FXBase {
 		if(enabled_) { 
 			reapplyFilter();
 			@:privateAccess {
-				_snd.activeFilter.enabled_ = false;
+				if(_snd.activeFilter != null) _snd.activeFilter.enabled_ = false;
 				_snd.activeFilter = this;
 			}
 		}

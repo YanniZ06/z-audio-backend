@@ -26,16 +26,18 @@ class PlayState extends FlxState
 		snd2 = new ZSound(soundInfo);
 		snd2.time = 6000;
 		//snd2.play();
-		new FlxTimer().start(6, _ -> SoundHandler.removeReverseCacheFrom(snd2.cacheAddress));
+		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));
 
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
-		snd.lowpass.enabled = true;
+		snd.bandpass.enabled = true;
+		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
+		snd.looping = true;
 
 		function loop_low() {
 			var twn:FlxTween;
-			twn = FlxTween.tween(snd, {"lowpass.gain_hf": 0.1}, 2, {onComplete: (_) -> {
-				twn = FlxTween.tween(snd, {"lowpass.gain_hf": 1}, 2, {onComplete: (_) -> loop_low()});
+			twn = FlxTween.tween(snd, {"bandpass.gain_hf": 0.1, "bandpass.gain_lf": 1}, 2, {onComplete: (_) -> {
+				twn = FlxTween.tween(snd, {"bandpass.gain_hf": 1, "bandpass.gain_lf": 0.1}, 2, {onComplete: (_) -> loop_low()});
 			}});
 		}
 		loop_low();
@@ -98,14 +100,15 @@ class PlayState extends FlxState
 			snd.volume = Math.max(0, snd.volume + (0.1 * (mod * negMod)));
 		}
 		if(FlxG.keys.justPressed.R) {
+			snd.buffer.preloadReverseData();
 			snd.reversed = !snd.reversed;
 		}
 		if(FlxG.keys.justPressed.L) {
 			snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
 		}
 		if(FlxG.keys.justPressed.K) {
-			//SoundHandler.removeFromMemory(snd);
-			SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
+			SoundHandler.removeFromMemory(snd);
+			//SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");
 		}
 	}

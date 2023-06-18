@@ -4,6 +4,10 @@ import zAudio.FilterBase.ALFilterType;
 
 /**
  * A filter representing a lowpass (or shelf).
+ * 
+ * Can be used to make audio sound muffled.
+ * 
+ * Lower values strengthen the lowpass filter.
  */
 class LowpassFilter extends FilterBase {
     /**
@@ -21,6 +25,10 @@ class LowpassFilter extends FilterBase {
      */
     public var gain_hf(default, set):Float = 1.0;
 
+    /**
+     * Loads in a new lowpass filter and attaches it to the `sndRef`.
+     * @param sndRef The sound to attach the filter to.
+     */
     public function new(sndRef:Sound) {
         super(sndRef, ALFilterType.FILTER_LOWPASS);
     }
