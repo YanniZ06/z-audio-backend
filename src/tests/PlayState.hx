@@ -33,6 +33,7 @@ class PlayState extends FlxState
 		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
 		snd.looping = true;
+		//snd.position.x = 80;
 
 		function loop_low() {
 			var twn:FlxTween;
@@ -58,9 +59,9 @@ class PlayState extends FlxState
 		});*/
 
 		/*var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/inspected.ogg"));
-		snd_.play();
+		snd_.play();*/
 
-		var tmr:haxe.Timer = new haxe.Timer(100);
+		/*var tmr:haxe.Timer = new haxe.Timer(100);
 		tmr.run = () -> snd_.stop();*/
 	}
 
@@ -104,7 +105,9 @@ class PlayState extends FlxState
 			snd.reversed = !snd.reversed;
 		}
 		if(FlxG.keys.justPressed.L) {
-			snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
+			//snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
+			SoundHandler.globalVolume += 0.1 * (negMod * mod);
+			//trace(SoundHandler.globalVolume);
 		}
 		if(FlxG.keys.justPressed.K) {
 			SoundHandler.removeFromMemory(snd);

@@ -13,13 +13,14 @@ interface SoundBaseI {
     public var finished(default, null):Bool;
 
     //General Values
-    public var volume(get, set):Float;
+    public var volume(default, set):Float;
     public var maxVolume(get, set):Float;
     public var pitch(get, set):Float;
     public var time(get, set):Float;
     public var looping(get, set):Bool;
     public var onComplete:Void -> Void;
     public var autoDestroy:Bool;
+    public var position:PositionHandle;
 
     //Sound Constants
     public var length(default, null):Float;

@@ -87,7 +87,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
      * 
      * The maximum applyable volume is defined by `maxVolume`.
      */
-    public var volume(get, set):Float;
+    public var volume(default, set):Float;
 
     /**
      * The highest value `volume` can have until it doesnt affect the actual gain of the sound anymore.
@@ -98,7 +98,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
      */
     public var maxVolume(get, set):Float;
 
-    private var actualVolume:Float = 1;
+    //private var actualVolume:Float = 1;
     /**
      * Whether this sound should loop or not.
      */
@@ -118,6 +118,12 @@ class Sound extends SoundFXLoader implements SoundBaseI{
      * The `activeSounds` Map adress this sound is contained in.
      */
     public var cacheAddress:String = "";
+    /**
+     * The current position of this sound.
+     * Useful for panning.
+     */
+    /*@:deprecated('Position currently does not function (lime\'s openal integration appears faulty). A replacement will be made soon.')
+    public var position:PositionHandle;*/
 
     /**
      * Loads in a new Sound object from the filled input buffer and returns it.
@@ -127,6 +133,14 @@ class Sound extends SoundFXLoader implements SoundBaseI{
 		//id = Pointer.addressOf(this);
         source = new SourceHandle(AL.createSource(), this);
 		source.attachBuffer(inputBuffer);
+
+        position = new PositionHandle();
+
+        /*position.onChange = (val:Float, type:String) -> {
+            //AL.distanceModel(AL.EXPONENT_DISTANCE);
+            AL.source3f(source.handle, AL.POSITION, position.x, position.y, position.z);
+            trace(AL.getSource3f(source.handle, AL.POSITION));
+        };*/
 
         timeGetter = timeGetRegular;
         timeSetter = timeSetRegular;
@@ -274,10 +288,10 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         setTimer(timeRemaining);
         return val;
     }
-    function get_volume():Float return actualVolume;
+    //function get_volume():Float return actualVolume;
     function set_volume(val:Float):Float {
-        actualVolume = val;
-        AL.sourcef(source.handle, AL.GAIN, val * SoundHandler.globalVolume);
+        /*actualVolume*/ volume = val;
+        AL.sourcef(source.handle, AL.GAIN, val); //* SoundHandler.globalVolume);
         return val;
     }
 

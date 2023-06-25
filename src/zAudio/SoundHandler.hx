@@ -40,7 +40,7 @@ class SoundHandler {
      * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
      * to prevent audio desyncing.
      */
-    private static inline var foc_lost_def:Bool = false; //!!!!!! SET TO TRUE
+    private static inline var foc_lost_def:Bool = true; //!!!! SET TO TRUE
 	public static var focusLost_pauseSnd(default, set):Bool = foc_lost_def;
 
     /**
@@ -63,7 +63,7 @@ class SoundHandler {
 	 * and `after` all SoundHandler options have been set to your preferred choice.
      */
     public static function init() {
-
+        AL.listenerf(AL.GAIN, globalVolume);
         //Initialize all settings on startup.
         //We dont trigger the setter twice as these are only triggered if the variable has the same value (which doesnt activate the setter)
 		if(focusLost_pauseSnd == foc_lost_def) change_focusLost_pauseSnd();
@@ -182,7 +182,8 @@ class SoundHandler {
     // -- SETTERS FOR OPTIONS THAT REQUIRE THEM --
     static function set_globalVolume(vol:Float):Float {
         globalVolume = vol;
-        for(cache in activeSounds) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
+        //for(cache in activeSounds) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
+        AL.listenerf(AL.GAIN, globalVolume);
         return vol;
     }
     static function set_focusLost_pauseSnd(val:Bool):Bool {
