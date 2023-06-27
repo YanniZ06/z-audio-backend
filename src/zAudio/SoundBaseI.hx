@@ -20,7 +20,7 @@ interface SoundBaseI {
     public var looping(get, set):Bool;
     public var onComplete:Void -> Void;
     public var autoDestroy:Bool;
-    public var position:PositionHandle;
+    //public var position:PositionHandle;
 
     //Sound Constants
     public var length(default, null):Float;

@@ -134,7 +134,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         source = new SourceHandle(AL.createSource(), this);
 		source.attachBuffer(inputBuffer);
 
-        position = new PositionHandle();
+        //position = new PositionHandle();
 
         /*position.onChange = (val:Float, type:String) -> {
             //AL.distanceModel(AL.EXPONENT_DISTANCE);
@@ -485,14 +485,15 @@ class Sound extends SoundFXLoader implements SoundBaseI{
 	 * Destroys this Sound and renders it unuseable.
 	 * Memory will be cleared the next time the garbage collector is activated.
 	 */
-    public function destroy() {
+    override public function destroy() {
         var curAddressPtr = SoundHandler.activeSounds[cacheAddress];
         curAddressPtr.sounds.remove(this);
         if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) SoundHandler.activeSounds.remove(cacheAddress);
         cacheAddress = null;
         curAddressPtr = null;
 
-        lowpass.destroy();
+        super.destroy(); //Get rid of / unload all fx
+
         buffer.destroy();
         source.destroy();
         if(finishTimer != null) {
