@@ -20,8 +20,8 @@ class SourceHandle
 	 * Effect Utility Function to get rid of an Auxilary Effect Slot connected to the source
 	 * @param id The ID of the auxilary slot to remove
 	 */
-	public function onAuxRemove(id:Int)
-		AL.removeSend(handle, id);
+	public function onAuxRemove(id:Int) //openal.AL.getProcAddress("")
+		//AL.removeSend(handle, id);
 
 	/**
 	 * Attaches a buffer to this `source`.

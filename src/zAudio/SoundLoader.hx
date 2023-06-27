@@ -1,16 +1,12 @@
 package zAudio;
 
 // import decoder.Mp3Decoder;
-import lime.utils.Int8Array;
-import lime.media.AudioBuffer;
 import haxe.Timer;
 import haxe.io.Bytes;
 import sys.io.File;
 import haxe.http.HttpBase;
 
-import lime.utils.ArrayBufferView;
-import lime._internal.backend.native.NativeCFFI;
-import lime.utils.UInt8Array;
+import stb.format.vorbis.Reader;
 import zAudio.handles.BufferHandle;
 
 class SoundLoader
@@ -71,12 +67,10 @@ class SoundLoader
 	 * @return A Buffer that stores the sound information.
 	 */
 	public static function from_ogg(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
-		#if (lime_cffi && !macro)
 		var cached = checkCache(filePath);
 		if(cached != null) return cached;
 
 		return oggLoad(bytes, filePath, preloadReverse);
-		#end
 		return null;
 	}
 
@@ -90,7 +84,7 @@ class SoundLoader
 	 * Check out your sounds' `buffer.preloadReverseData()` field for a way to preload the reverse data later.
 	 * @return A Buffer that stores the byte information.
 	 */
-	 public static function from_wav(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
+	public static function from_wav(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
 		var cached = checkCache(filePath);
 		if(cached != null) return cached;
 
@@ -99,14 +93,13 @@ class SoundLoader
 
 	//Avoid checking cache twice lol
 	private static function oggLoad(bytes:Bytes, filePath:String, preloadReverse:Bool):BufferHandle {
-		#if (lime_cffi && !macro)
 		@:privateAccess {
-			var audioBuffer = new AudioBuffer();
+			/*var audioBuffer = new AudioBuffer();
 			audioBuffer.data = new UInt8Array(Bytes.alloc(0));
 			NativeCFFI.lime_audio_load_bytes(bytes, audioBuffer);
 			
 			SoundHandler.existingBufferData.set(filePath, 
-				new BufferHandle(AL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));
+				new BufferHandle(AL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));*/
 			
 			//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 			var addressContainer = SoundHandler.activeSounds[filePath];
@@ -115,7 +108,6 @@ class SoundLoader
 			
 			return getCache(filePath);
 		}
-		#end
 		return null;
 	}
 
@@ -135,7 +127,7 @@ class SoundLoader
 		input.position += 4; // should be data marker
 		final len = input.readInt32();
 		final rawData = input.read(len);
-		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(channels, bitsPerSample, resolveDataFromBytes(rawData), samplingRate, preloadReverse));
+		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
 
 		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 		var addressContainer = SoundHandler.activeSounds[filePath];
@@ -163,19 +155,16 @@ class SoundLoader
 
 	// -- Utility loading functions --
 
-	//This took stupidly long to figure out, sincerely fuck you lime for making ArrayBufferViews so hard to create
-	private static inline function resolveDataFromBytes(bytes:Bytes):ArrayBufferView return cast UInt8Array.fromBytes(bytes);
-
 	private static function bufferFromBytes(bytes:Bytes, path:String, preloadReverse:Bool):BufferHandle {
 		final fileSignature:String = bytes.getString(0, 4);
 		switch (fileSignature) // File Signature
 		{
 			case "OggS": return oggLoad(bytes, path, preloadReverse);
 			case "RIFF" if (bytes.getString(8, 4) == "WAVE"): return wavLoad(bytes, path, preloadReverse);
-			default:
+			default: //Mp3 integration (will be lead by: https://github.com/LogicInteractive/MiniMP3.hx/tree/main)
 				switch ([bytes.get(0), bytes.get(1), bytes.get(2)])
 				{
-					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: throw 'MP3 audio is not supported on this backend!';
+					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: throw 'MP3 audio is in progress!';
 					default: throw 'Invalid sound format or file-header "$fileSignature"!';
 				}
 		}

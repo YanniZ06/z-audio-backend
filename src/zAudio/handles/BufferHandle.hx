@@ -1,13 +1,13 @@
 package zAudio.handles;
 
-import lime.utils.Int8Array;
-import lime.utils.ArrayBufferView;
+import haxe.io.UInt8Array;
+import haxe.io.Bytes;
 
 class BufferHandle
 {
 	public var handle:ALBuffer = null;
-	public var data:ArrayBufferView = null;
-	public var reverseData:ArrayBufferView = null;
+	public var data:Bytes = null;
+	public var reverseData:Bytes = null;
 	public var dataLength(get, never):Int;
     function get_dataLength():Int { if(data == null) return 0; else return data.length;}
 	public var samples:Int = 0;
@@ -26,12 +26,12 @@ class BufferHandle
 	 * Fills the buffer with informations about the sound. Can only be used once per handle and is only really used on the `SoundLoader`.
 	 * @param channels Channel Information
 	 * @param bitsPerSample Amount of bits per sample
-	 * @param data An ArrayBufferView consisting of the decoded sound-data bytes
+	 * @param data Bytes consisting of the decoded sound-data
 	 * @param sampleRate Samplerate Information
 	 * @param doPreloadReverseData If true, preloads the reverse sound information. Otherwise reverse sound data can be loaded using `preloadReverseData`
 	 * @return This buffer, for chaining purposes.
 	 */
-	public function fill(channels:Int, bitsPerSample:Int, data:ArrayBufferView, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
+	public function fill(channels:Int, bitsPerSample:Int, data:Bytes, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
 		this.channels = channels;
 		this.bitsPerSample = bitsPerSample;
 		this.data = data;
@@ -58,12 +58,11 @@ class BufferHandle
 	public function preloadReverseData() {
 		if(reverseData != null) return;
 
-		var dataArr:Int8Array = cast data;
-		var reversed:Int8Array = new Int8Array(dataArr.length);
-		@:privateAccess for(byteI in 0...dataArr.length) {
-			reversed.__set(byteI, dataArr.__get((dataArr.length - byteI))); //Set byte from back of data array to front of reversed array
-		}
-		reverseData = cast reversed;
+		var data_:UInt8Array = UInt8Array.fromBytes(data);
+		var reversed:UInt8Array = new UInt8Array();
+		for(byteI in 0...data_.length)
+			reversed.set(byteI, data_.get(data_.length - byteI)); //Set byte from back of data array to front of reversed array
+		reverseData = reversed.getData().bytes; //cast reversed;
 
 		var curCache = SoundHandler.activeSounds[cacheAddress];
 		if(curCache == null) return;
