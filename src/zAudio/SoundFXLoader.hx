@@ -35,4 +35,14 @@ class SoundFXLoader {
         highpass = new HighpassFilter(sndParent);
         bandpass = new BandpassFilter(sndParent);
     }
+
+    //Gets rid of all filters and sound effects
+    public function destroy() {
+        lowpass.destroy();
+        lowpass = null;
+        highpass.destroy();
+        highpass = null;
+        bandpass.destroy();
+        bandpass = null;
+    }
 }
