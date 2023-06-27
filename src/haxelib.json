@@ -1,0 +1,11 @@
+{
+  "name": "stb_ogg_sound",
+  "url" : "https://github.com/shohei909/haxe_stb_ogg_sound",
+  "license": "Public",
+  "tags": ["flash", "cs", "java", "neko", "ogg", "format"],
+  "description": "public domain ogg decoder",
+  "version": "0.0.2",
+  "releasenote": "fix bug of residue decoding",
+  "contributors": ["shohei909"],
+  "dependencies": {}
+}
