@@ -5,12 +5,12 @@ package zAudio.handles;
  */
 class SourceHandle
 {
-	public var handle:ALSource = null;
+	public var handle:Int = null;
 	public var buffer:BufferHandle = null;
 	public var parentSound:Sound = null;
 	public var hasFilter:Bool = false;
 
-	public function new(?hndl:ALSource, parentSound:Sound)
+	public function new(?hndl:Int, parentSound:Sound)
 	{
 		handle = hndl;
 		this.parentSound = parentSound;
@@ -20,7 +20,7 @@ class SourceHandle
 	 * Effect Utility Function to get rid of an Auxilary Effect Slot connected to the source
 	 * @param id The ID of the auxilary slot to remove
 	 */
-	public function onAuxRemove(id:Int) //openal.AL.getProcAddress("")
+	//public function onAuxRemove(id:Int) //openal.AL.getProcAddress("")
 		//AL.removeSend(handle, id);
 
 	/**

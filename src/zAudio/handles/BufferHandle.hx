@@ -2,10 +2,11 @@ package zAudio.handles;
 
 import haxe.io.UInt8Array;
 import haxe.io.Bytes;
+import openal.AL.ALuint;
 
 class BufferHandle
 {
-	public var handle:ALBuffer = null;
+	public var handle:Null<ALuint> = null;
 	public var data:Bytes = null;
 	public var reverseData:Bytes = null;
 	public var dataLength(get, never):Int;
@@ -17,7 +18,7 @@ class BufferHandle
 	public var format:Int = AL.FORMAT_MONO8;
 	public var parentSource:SourceHandle = null;
 
-	public function new(buffer:ALBuffer) {
+	public function new(buffer:ALuint) {
 		handle = buffer;
 	}
 
@@ -100,7 +101,7 @@ class BufferHandle
 	 * @return A buffer with the same data.
 	 */
 	public static function copyFrom(b2:BufferHandle):BufferHandle {
-		var b:BufferHandle = new BufferHandle(AL.createBuffer());
+		var b:BufferHandle = new BufferHandle(AL.genBuffer());
 		if(b2.data != null) b.fill(b2.channels, b2.bitsPerSample, b2.data, b2.sampleRate, false);
 		if(b2.reverseData != null) b.reverseData = b2.reverseData;
 

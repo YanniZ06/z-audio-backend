@@ -45,7 +45,7 @@ class PlayState extends FlxState
 		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
-		/*var buffer = new BufferHandle(AL.createBuffer());
+		/*var buffer = new BufferHandle(AL.genBuffer());
 
 		trace(snd.buffer.reverseData);
 		buffer.fill(snd.buffer.channels, snd.buffer.bitsPerSample, snd.buffer.reverseData, snd.buffer.sampleRate, false);

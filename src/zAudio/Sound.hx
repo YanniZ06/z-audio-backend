@@ -19,7 +19,7 @@ import haxe.Timer;
  * 
  * To find out more about filter and effect properties, visit the `API Documentation`.
  */
-class Sound extends SoundFXLoader implements SoundBaseI{
+class Sound extends SoundFXLoader implements SoundBaseI {
     var finishTimer:Timer;
     /**
      * Handle for the connected ALSource and its various properties.
@@ -131,7 +131,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
      */
     public function new(inputBuffer:BufferHandle) {
 		//id = Pointer.addressOf(this);
-        source = new SourceHandle(AL.createSource(), this);
+        source = new SourceHandle(AL.genSource(), this);
 		source.attachBuffer(inputBuffer);
 
         //position = new PositionHandle();

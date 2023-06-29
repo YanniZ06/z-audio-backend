@@ -23,145 +23,145 @@ extern class AL {
     // scene configs
 
             @:native('alDopplerFactor')
-        static function dopplerFactor(value:Float) : Void;
+        public static function dopplerFactor(value:Float) : Void;
             @:native('alDopplerVelocity')
-        static function dopplerVelocity(value:Float) : Void;
+        public static function dopplerVelocity(value:Float) : Void;
             @:native('alSpeedOfSound')
-        static function speedOfSound(value:Float) : Void;
+        public static function speedOfSound(value:Float) : Void;
             @:native('alDistanceModel')
-        static function distanceModel(distanceModel:Int) : Void;
+        public static function distanceModel(distanceModel:Int) : Void;
 
     // scene management
 
             @:native('alEnable')
-        static function enable(capability:Int) : Void;
+        public static function enable(capability:Int) : Void;
             @:native('alDisable')
-        static function disable(capability:Int) : Void;
+        public static function disable(capability:Int) : Void;
             @:native('alIsEnabled')
-        static function isEnabled(capability:Int) : Bool;
+        public static function isEnabled(capability:Int) : Bool;
 
     // scene state
 
             @:native('alGetString')
-        static function getString(param:Int) : String;
+        public static function getString(param:Int) : String;
             @:native('alGetBooleanv')
-        static function getBooleanv(param:Int, ?count:Int = 1 ) : Array<Bool>;
+        public static function getBooleanv(param:Int, ?count:Int = 1 ) : Array<Bool>;
             @:native('alGetIntegerv')
-        static function getIntegerv(param:Int, ?count:Int = 1 ) : Array<Int>;
+        public static function getIntegerv(param:Int, ?count:Int = 1 ) : Array<Int>;
             @:native('alGetFloatv')
-        static function getFloatv(param:Int, ?count:Int = 1 ) : Array<Float>;
+        public static function getFloatv(param:Int, ?count:Int = 1 ) : Array<Float>;
             @:native('alGetDoublev')
-        static function getDoublev(param:Int, ?count:Int = 1 ) : Array<Float>;
+        public static function getDoublev(param:Int, ?count:Int = 1 ) : Array<Float>;
             @:native('alGetBoolean')
-        static function getBoolean(param:Int) : Bool;
+        public static function getBoolean(param:Int) : Bool;
             @:native('alGetInteger')
-        static function getInteger(param:Int) : Int;
+        public static function getInteger(param:Int) : Int;
             @:native('alGetFloat')
-        static function getFloat(param:Int) : Float;
+        public static function getFloat(param:Int) : Float;
             @:native('alGetDouble')
-        static function getDouble(param:Int) : Float;
+        public static function getDouble(param:Int) : Float;
             @:native('alGetError')
-        static function getError() : Int;
+        public static function getError() : Int;
 
 
     // extensions
 
             @:native('alIsExtensionPresent')
-        static function isExtensionPresent(extname:String) : Bool;
+        public static function isExtensionPresent(extname:String) : Bool;
             @:native('alGetProcAddress')
-        static function getProcAddress(fname:String) : Dynamic; // :warn: not sure yet
+        public static function getProcAddress(fname:String) : Dynamic; // :warn: not sure yet
             @:native('alGetEnumValue')
-        static function getEnumValue(ename:String) : Int;
+        public static function getEnumValue(ename:String) : Int;
 
     // listener state
 
             @:native('alListenerf')
-        static function listenerf(param:Int, value:Float) : Void;
+        public static function listenerf(param:Int, value:Float) : Void;
             @:native('alListener3f')
-        static function listener3f(param:Int, value1:Float, value2:Float, value3:Float) : Void;
+        public static function listener3f(param:Int, value1:Float, value2:Float, value3:Float) : Void;
             @:native('alListenerfv')
-        static function listenerfv(param:Int, values:Array<Float> ) : Void;
+        public static function listenerfv(param:Int, values:Array<Float> ) : Void;
             @:native('alListeneri')
-        static function listeneri(param:Int, value:Int) : Void;
+        public static function listeneri(param:Int, value:Int) : Void;
             @:native('alListener3i')
-        static function listener3i(param:Int, value1:Int, value2:Int, value3:Int) : Void;
+        public static function listener3i(param:Int, value1:Int, value2:Int, value3:Int) : Void;
             @:native('alListeneriv')
-        static function listeneriv(param:Int, values:Array<Int> ) : Void;
+        public static function listeneriv(param:Int, values:Array<Int> ) : Void;
             @:native('alGetListenerf')
-        static function getListenerf(param:Int) : Float;
+        public static function getListenerf(param:Int) : Float;
             @:native('alGetListener3f')
-        static function getListener3f(param:Int) : Array<Float>;
+        public static function getListener3f(param:Int) : Array<Float>;
             @:native('alGetListenerfv')
-        static function getListenerfv(param:Int, ?count:Int = 1) : Array<Float>;
+        public static function getListenerfv(param:Int, ?count:Int = 1) : Array<Float>;
             @:native('alGetListeneri')
-        static function getListeneri(param:Int) : Int;
+        public static function getListeneri(param:Int) : Int;
             @:native('alGetListener3i')
-        static function getListener3i(param:Int) : Array<Int>;
+        public static function getListener3i(param:Int) : Array<Int>;
             @:native('alGetListeneriv')
-        static function getListeneriv( param:Int, ?count:Int = 1) : Array<Int>;
+        public static function getListeneriv( param:Int, ?count:Int = 1) : Array<Int>;
 
     // source management
 
             @:native('alGenSources') //:todo:
-        static function genSources(n:Int) : Array<Int>;
+        public static function genSources(n:Int) : Array<Int>;
             @:native('alDeleteSources') //:todo:
-        static function deleteSources(sources:Array<Int>) : Void;
+        public static function deleteSources(sources:Array<Int>) : Void;
             @:native('alIsSource')
-        static function isSource(source:Int) : Bool;
+        public static function isSource(source:Int) : Bool;
 
     // source state
 
             @:native('alSourcef')
-        static function sourcef(source:Int, param:Int, value:Float) : Void;
+        public static function sourcef(source:Int, param:Int, value:Float) : Void;
             @:native('alSource3f')
-        static function source3f(source:Int, param:Int, value1:Float, value2:Float, value3:Float) : Void;
+        public static function source3f(source:Int, param:Int, value1:Float, value2:Float, value3:Float) : Void;
             @:native('alSourcefv')
-        static function sourcefv(source:Int, param:Int, values:Array<Float> ) : Void;
+        public static function sourcefv(source:Int, param:Int, values:Array<Float> ) : Void;
             @:native('alSourcei')
-        static function sourcei(source:Int, param:Int, value:Int) : Void;
+        public static function sourcei(source:Int, param:Int, value:Int) : Void;
             @:native('alSource3i')
-        static function source3i(source:Int, param:Int, value1:Int, value2:Int, value3:Int) : Void;
+        public static function source3i(source:Int, param:Int, value1:Int, value2:Int, value3:Int) : Void;
             @:native('alSourceiv') //:todo:
-        static function sourceiv(source:Int, param:Int, values:Array<Int> ) : Void;
+        public static function sourceiv(source:Int, param:Int, values:Array<Int> ) : Void;
             @:native('linc::openal::getSourcef')
-        static function getSourcef(source:Int, param:Int) : Float;
+        public static function getSourcef(source:Int, param:Int) : Float;
             @:native('linc::openal::getSource3f')
-        static function getSource3f(source:Int, param:Int, into:Array<Float>) : Array<Float>;
+        public static function getSource3f(source:Int, param:Int, into:Array<Float>) : Array<Float>;
             @:native('alGetSourcefv') //:todo:
-        static function getSourcefv(source:Int, param:Int) : Array<Float>;
+        public static function getSourcefv(source:Int, param:Int) : Array<Float>;
             @:native('linc::openal::getSourcei')
-        static function getSourcei(source:Int,  param:Int) : Int;
+        public static function getSourcei(source:Int,  param:Int) : Int;
             @:native('linc::openal::getSource3i')
-        static function getSource3i(source:Int, param:Int, into:Array<Int>) : Array<Int>;
+        public static function getSource3i(source:Int, param:Int, into:Array<Int>) : Array<Int>;
             @:native('alGetSourceiv') //:todo:
-        static function getSourceiv(source:Int,  param:Int, ?count:Int = 1) : Array<Int>;
+        public static function getSourceiv(source:Int,  param:Int, ?count:Int = 1) : Array<Int>;
 
     //source states
 
             @:native('alSourcePlayv')
-        static function sourcePlayv(sources:Array<Int>) : Void;
+        public static function sourcePlayv(sources:Array<Int>) : Void;
             @:native('alSourceStopv')
-        static function sourceStopv(sources:Array<Int>) : Void;
+        public static function sourceStopv(sources:Array<Int>) : Void;
             @:native('alSourceRewindv')
-        static function sourceRewindv(sources:Array<Int>) : Void;
+        public static function sourceRewindv(sources:Array<Int>) : Void;
             @:native('alSourcePausev')
-        static function sourcePausev(sources:Array<Int>) : Void;
+        public static function sourcePausev(sources:Array<Int>) : Void;
             @:native('alSourcePlay')
-        static function sourcePlay(source:Int) : Void;
+        public static function sourcePlay(source:Int) : Void;
             @:native('alSourceStop')
-        static function sourceStop(source:Int) : Void;
+        public static function sourceStop(source:Int) : Void;
             @:native('alSourceRewind')
-        static function sourceRewind(source:Int) : Void;
+        public static function sourceRewind(source:Int) : Void;
             @:native('alSourcePause')
-        static function sourcePause(source:Int) : Void;
+        public static function sourcePause(source:Int) : Void;
             @:native('alSourceQueueBuffers') //:todo:
-        static function sourceQueueBuffers(source:Int, nb:Int, buffers:Array<ALuint>) : Void;
+        public static function sourceQueueBuffers(source:Int, nb:Int, buffers:Array<ALuint>) : Void;
             @:native('alSourceUnqueueBuffers') //:todo:
-        static function sourceUnqueueBuffers(source:Int, nb:Int) : Array<ALuint>;
+        public static function sourceUnqueueBuffers(source:Int, nb:Int) : Array<ALuint>;
 
     //buffer management
 
-        static inline function genBuffers(n:Int, into:Array<ALuint>) : Array<ALuint> {
+        public static inline function genBuffers(n:Int, into:Array<ALuint>) : Array<ALuint> {
             var _i = 0;
             while(_i < n) {
                 into[_i] = genBuffer();
@@ -170,7 +170,7 @@ extern class AL {
             return into;
         }
 
-        static function deleteBuffers(buffers:Array<ALuint>) : Void {
+        public static function deleteBuffers(buffers:Array<ALuint>) : Void {
             var _i = 0;
             while(_i < n) {
                 deleteBuffer(buffers[_i]);
@@ -179,122 +179,122 @@ extern class AL {
         }
 
             @:native('alIsBuffer')
-        static function isBuffer(buffer:ALuint) : Bool;
+        public static function isBuffer(buffer:ALuint) : Bool;
 
     //buffer data and state
 
             @:native('linc::openal::bufferData')
-        static function bufferData(buffer:ALuint, format:Int, frequency:Int, bytes:haxe.io.BytesData, byteOffset:Int, byteLength:Int) : Void;
+        public static function bufferData(buffer:ALuint, format:Int, frequency:Int, bytes:haxe.io.BytesData, byteOffset:Int, byteLength:Int) : Void;
             @:native('alBufferf')
-        static function bufferf(buffer:ALuint, param:Int, value:Float) : Void;
+        public static function bufferf(buffer:ALuint, param:Int, value:Float) : Void;
             @:native('alBuffer3f')//:todo:
-        static function buffer3f(buffer:ALuint, param:Int, value1:Float, value2:Float, value3:Float) : Void;
+        public static function buffer3f(buffer:ALuint, param:Int, value1:Float, value2:Float, value3:Float) : Void;
             @:native('alBufferfv')//:todo:
-        static function bufferfv(buffer:ALuint, param:Int, values:Array<Float> ) : Void;
+        public static function bufferfv(buffer:ALuint, param:Int, values:Array<Float> ) : Void;
             @:native('alBufferi')
-        static function bufferi(buffer:ALuint, param:Int, value:Int) : Void;
+        public static function bufferi(buffer:ALuint, param:Int, value:Int) : Void;
             @:native('alBuffer3i')
-        static function buffer3i(buffer:ALuint, param:Int, value1:Int, value2:Int, value3:Int) : Void;
+        public static function buffer3i(buffer:ALuint, param:Int, value1:Int, value2:Int, value3:Int) : Void;
             @:native('alBufferiv')//:todo:
-        static function bufferiv(buffer:ALuint, param:Int, values:Array<Int> ) : Void;
+        public static function bufferiv(buffer:ALuint, param:Int, values:Array<Int> ) : Void;
             @:native('linc::openal::getBufferf')
-        static function getBufferf(buffer:ALuint, param:Int) : Float;
+        public static function getBufferf(buffer:ALuint, param:Int) : Float;
             @:native('alGetBuffer3f')//:todo:
-        static function getBuffer3f(buffer:ALuint, param:Int) : Array<Float>;
+        public static function getBuffer3f(buffer:ALuint, param:Int) : Array<Float>;
             @:native('alGetBufferfv')//:todo:
-        static function getBufferfv(buffer:ALuint, param:Int, ?count:Int = 1) : Array<Float>;
+        public static function getBufferfv(buffer:ALuint, param:Int, ?count:Int = 1) : Array<Float>;
             @:native('linc::openal::getBufferi')
-        static function getBufferi(buffer:ALuint, param:Int) : Int;
+        public static function getBufferi(buffer:ALuint, param:Int) : Int;
             @:native('alGetBuffer3i')//:todo:
-        static function getBuffer3i(buffer:ALuint, param:Int) : Array<Int>;
+        public static function getBuffer3i(buffer:ALuint, param:Int) : Array<Int>;
             @:native('alGetBufferiv')//:todo:
-        static function getBufferiv(buffer:ALuint, param:Int, ?count:Int = 1) : Array<Int>;
+        public static function getBufferiv(buffer:ALuint, param:Int, ?count:Int = 1) : Array<Int>;
 
     //unofficial API helpers
 
             @:native('linc::openal::genSource')
-        static function genSource() : Int;
+        public static function genSource() : Int;
             @:native('linc::openal::deleteSource')
-        static function deleteSource(source:Int) : Void;
+        public static function deleteSource(source:Int) : Void;
             @:native('linc::openal::genBuffer')
-        static function genBuffer() : ALuint;
+        public static function genBuffer() : ALuint;
             @:native('linc::openal::deleteBuffer')
-        static function deleteBuffer(buffer:ALuint) : Void;
+        public static function deleteBuffer(buffer:ALuint) : Void;
 
             @:native('linc::openal::sourceQueueBuffer')
-        static function sourceQueueBuffer(source:Int, buffer:ALuint) : Void;
+        public static function sourceQueueBuffer(source:Int, buffer:ALuint) : Void;
             @:native('linc::openal::sourceUnqueueBuffer')
-        static function sourceUnqueueBuffer(source:Int) : ALuint;
+        public static function sourceUnqueueBuffer(source:Int) : ALuint;
 
 
     //defines
 
-        static inline var NONE : Int                                = 0;
-        static inline var FALSE : Int                               = 0;
-        static inline var TRUE : Int                                = 1;
+        public static inline var NONE : Int                                = 0;
+        public static inline var FALSE : Int                               = 0;
+        public static inline var TRUE : Int                                = 1;
 
-        static inline var SOURCE_RELATIVE : Int                     = 0x202;
-        static inline var CONE_INNER_ANGLE : Int                    = 0x1001;
-        static inline var CONE_OUTER_ANGLE : Int                    = 0x1002;
-        static inline var PITCH : Int                               = 0x1003;
-        static inline var POSITION : Int                            = 0x1004;
-        static inline var DIRECTION : Int                           = 0x1005;
-        static inline var VELOCITY : Int                            = 0x1006;
-        static inline var LOOPING : Int                             = 0x1007;
-        static inline var BUFFER : Int                              = 0x1009;
-        static inline var GAIN : Int                                = 0x100A;
-        static inline var MIN_GAIN : Int                            = 0x100D;
-        static inline var MAX_GAIN : Int                            = 0x100E;
-        static inline var ORIENTATION : Int                         = 0x100F;
-        static inline var SOURCE_STATE : Int                        = 0x1010;
-        static inline var INITIAL : Int                             = 0x1011;
-        static inline var PLAYING : Int                             = 0x1012;
-        static inline var PAUSED : Int                              = 0x1013;
-        static inline var STOPPED : Int                             = 0x1014;
-        static inline var BUFFERS_QUEUED : Int                      = 0x1015;
-        static inline var BUFFERS_PROCESSED : Int                   = 0x1016;
-        static inline var REFERENCE_DISTANCE : Int                  = 0x1020;
-        static inline var ROLLOFF_FACTOR : Int                      = 0x1021;
-        static inline var CONE_OUTER_GAIN : Int                     = 0x1022;
-        static inline var MAX_DISTANCE : Int                        = 0x1023;
-        static inline var SEC_OFFSET : Int                          = 0x1024;
-        static inline var SAMPLE_OFFSET : Int                       = 0x1025;
-        static inline var BYTE_OFFSET : Int                         = 0x1026;
-        static inline var SOURCE_TYPE : Int                         = 0x1027;
-        static inline var STATIC : Int                              = 0x1028;
-        static inline var STREAMING : Int                           = 0x1029;
-        static inline var UNDETERMINED : Int                        = 0x1030;
-        static inline var FORMAT_MONO8 : Int                        = 0x1100;
-        static inline var FORMAT_MONO16 : Int                       = 0x1101;
-        static inline var FORMAT_STEREO8 : Int                      = 0x1102;
-        static inline var FORMAT_STEREO16 : Int                     = 0x1103;
-        static inline var FREQUENCY : Int                           = 0x2001;
-        static inline var BITS : Int                                = 0x2002;
-        static inline var CHANNELS : Int                            = 0x2003;
-        static inline var SIZE : Int                                = 0x2004;
-        static inline var NO_ERROR : Int                            = 0;
-        static inline var INVALID_NAME : Int                        = 0xA001;
-        static inline var INVALID_ENUM : Int                        = 0xA002;
-        static inline var INVALID_VALUE : Int                       = 0xA003;
-        static inline var INVALID_OPERATION : Int                   = 0xA004;
-        static inline var OUT_OF_MEMORY : Int                       = 0xA005;
-        static inline var VENDOR : Int                              = 0xB001;
-        static inline var VERSION : Int                             = 0xB002;
-        static inline var RENDERER : Int                            = 0xB003;
-        static inline var EXTENSIONS : Int                          = 0xB004;
+        public static inline var SOURCE_RELATIVE : Int                     = 0x202;
+        public static inline var CONE_INNER_ANGLE : Int                    = 0x1001;
+        public static inline var CONE_OUTER_ANGLE : Int                    = 0x1002;
+        public static inline var PITCH : Int                               = 0x1003;
+        public static inline var POSITION : Int                            = 0x1004;
+        public static inline var DIRECTION : Int                           = 0x1005;
+        public static inline var VELOCITY : Int                            = 0x1006;
+        public static inline var LOOPING : Int                             = 0x1007;
+        public static inline var BUFFER : Int                              = 0x1009;
+        public static inline var GAIN : Int                                = 0x100A;
+        public static inline var MIN_GAIN : Int                            = 0x100D;
+        public static inline var MAX_GAIN : Int                            = 0x100E;
+        public static inline var ORIENTATION : Int                         = 0x100F;
+        public static inline var SOURCE_STATE : Int                        = 0x1010;
+        public static inline var INITIAL : Int                             = 0x1011;
+        public static inline var PLAYING : Int                             = 0x1012;
+        public static inline var PAUSED : Int                              = 0x1013;
+        public static inline var STOPPED : Int                             = 0x1014;
+        public static inline var BUFFERS_QUEUED : Int                      = 0x1015;
+        public static inline var BUFFERS_PROCESSED : Int                   = 0x1016;
+        public static inline var REFERENCE_DISTANCE : Int                  = 0x1020;
+        public static inline var ROLLOFF_FACTOR : Int                      = 0x1021;
+        public static inline var CONE_OUTER_GAIN : Int                     = 0x1022;
+        public static inline var MAX_DISTANCE : Int                        = 0x1023;
+        public static inline var SEC_OFFSET : Int                          = 0x1024;
+        public static inline var SAMPLE_OFFSET : Int                       = 0x1025;
+        public static inline var BYTE_OFFSET : Int                         = 0x1026;
+        public static inline var SOURCE_TYPE : Int                         = 0x1027;
+        public static inline var STATIC : Int                              = 0x1028;
+        public static inline var STREAMING : Int                           = 0x1029;
+        public static inline var UNDETERMINED : Int                        = 0x1030;
+        public static inline var FORMAT_MONO8 : Int                        = 0x1100;
+        public static inline var FORMAT_MONO16 : Int                       = 0x1101;
+        public static inline var FORMAT_STEREO8 : Int                      = 0x1102;
+        public static inline var FORMAT_STEREO16 : Int                     = 0x1103;
+        public static inline var FREQUENCY : Int                           = 0x2001;
+        public static inline var BITS : Int                                = 0x2002;
+        public static inline var CHANNELS : Int                            = 0x2003;
+        public static inline var SIZE : Int                                = 0x2004;
+        public static inline var NO_ERROR : Int                            = 0;
+        public static inline var INVALID_NAME : Int                        = 0xA001;
+        public static inline var INVALID_ENUM : Int                        = 0xA002;
+        public static inline var INVALID_VALUE : Int                       = 0xA003;
+        public static inline var INVALID_OPERATION : Int                   = 0xA004;
+        public static inline var OUT_OF_MEMORY : Int                       = 0xA005;
+        public static inline var VENDOR : Int                              = 0xB001;
+        public static inline var VERSION : Int                             = 0xB002;
+        public static inline var RENDERER : Int                            = 0xB003;
+        public static inline var EXTENSIONS : Int                          = 0xB004;
 
 
-        static inline var DOPPLER_FACTOR:Int                        = 0xC000;
-        static inline var SPEED_OF_SOUND:Int                        = 0xC003;
-        static inline var DOPPLER_VELOCITY:Int                      = 0xC001;
+        public static inline var DOPPLER_FACTOR:Int                        = 0xC000;
+        public static inline var SPEED_OF_SOUND:Int                        = 0xC003;
+        public static inline var DOPPLER_VELOCITY:Int                      = 0xC001;
 
-        static inline var DISTANCE_MODEL:Int                        = 0xD000;
-        static inline var INVERSE_DISTANCE:Int                      = 0xD001;
-        static inline var INVERSE_DISTANCE_CLAMPED:Int              = 0xD002;
-        static inline var LINEAR_DISTANCE:Int                       = 0xD003;
-        static inline var LINEAR_DISTANCE_CLAMPED:Int               = 0xD004;
-        static inline var EXPONENT_DISTANCE:Int                     = 0xD005;
-        static inline var EXPONENT_DISTANCE_CLAMPED:Int             = 0xD006;
+        public static inline var DISTANCE_MODEL:Int                        = 0xD000;
+        public static inline var INVERSE_DISTANCE:Int                      = 0xD001;
+        public static inline var INVERSE_DISTANCE_CLAMPED:Int              = 0xD002;
+        public static inline var LINEAR_DISTANCE:Int                       = 0xD003;
+        public static inline var LINEAR_DISTANCE_CLAMPED:Int               = 0xD004;
+        public static inline var EXPONENT_DISTANCE:Int                     = 0xD005;
+        public static inline var EXPONENT_DISTANCE_CLAMPED:Int             = 0xD006;
 
 } //AL
 

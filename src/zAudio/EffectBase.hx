@@ -6,7 +6,7 @@ package zAudio;
 class EffectBase extends FXBase {
 	public var mix(get, set):Float;
 
-	private var effect:ALEffect = null;
+	private var effect:Int = null;
 	private var aux:AuxSlotHandle = null;
 
 	/**
@@ -26,25 +26,15 @@ class EffectBase extends FXBase {
 
 		aux.destroy();
 		aux = null;
-		if(effect != null) deleteEffect(effect);
+		if(effect != null) AL_EFX.deleteEffect(effect);
 		effect = null;
 	}
 
-	public static function makeEffect(type:ALEffectType):ALEffect {
-		var fx = AL.createEffect();
-		AL.effecti(fx, ALEffectTypeParam.EFFECT_TYPE, type);
+	public static function makeEffect(type:ALEffectType):Int {
+		var fx = AL_EFX.createEffect();
+		AL_EFX.effecti(fx, ALEffectTypeParam.EFFECT_TYPE, type);
 		
 		return fx;
-	}
-
-	/**
-	 * Deletes the ALEffect `effect`.
-	 * @param effect The effect to delete.
-	 */
-	public static function deleteEffect(effect:ALEffect) {
-		#if (lime_cffi && lime_openal && !macro)
-		LimeAudioCFFI.lime_al_delete_effect(effect);
-		#end
 	}
 
 	function get_mix():Float return aux.volume;

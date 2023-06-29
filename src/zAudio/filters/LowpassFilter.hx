@@ -35,7 +35,7 @@ class LowpassFilter extends FilterBase {
 
     function set_gain(val:Float):Float {
         gain = val;
-        AL.filterf(filter, LowpassParam.LOWPASS_GAIN, val);
+        AL_EFX.filterf(filter, LowpassParam.LOWPASS_GAIN, val);
         if(enabled) reapplyFilter();
 
         return val;
@@ -43,7 +43,7 @@ class LowpassFilter extends FilterBase {
 
     function set_gain_hf(val:Float):Float {
         gain_hf = val;
-        AL.filterf(filter, LowpassParam.LOWPASS_GAINHF, val);
+        AL_EFX.filterf(filter, LowpassParam.LOWPASS_GAINHF, val);
         if(enabled) reapplyFilter();
 
         return val;

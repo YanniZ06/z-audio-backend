@@ -99,7 +99,7 @@ class SoundLoader
 			NativeCFFI.lime_audio_load_bytes(bytes, audioBuffer);
 			
 			SoundHandler.existingBufferData.set(filePath, 
-				new BufferHandle(AL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));*/
+				new BufferHandle(AL.genBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));*/
 			
 			//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 			var addressContainer = SoundHandler.activeSounds[filePath];
@@ -127,7 +127,7 @@ class SoundLoader
 		input.position += 4; // should be data marker
 		final len = input.readInt32();
 		final rawData = input.read(len);
-		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
+		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.genBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
 
 		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 		var addressContainer = SoundHandler.activeSounds[filePath];
@@ -169,7 +169,5 @@ class SoundLoader
 				}
 		}
 		return null;
-
-		//throw 'Invalid sound format "$type"';
 	}
 }

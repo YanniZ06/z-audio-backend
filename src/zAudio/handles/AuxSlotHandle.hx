@@ -10,6 +10,7 @@ import lime.system.CFFIPointer;
 
 /**
  * A handle for an `ALAuxiliaryEffectSlot`, used to contain effects and filters to apply them to sources using the `applyTo` method.
+ * TODO: REPLACE ALL EFFECT STUFF ETC WITH INTS LOL
  */
 class AuxSlotHandle
 {

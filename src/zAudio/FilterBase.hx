@@ -10,7 +10,7 @@ class FilterBase extends FXBase {
 	public var enabled(get, set):Bool;
 	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and using unnecessary time to call an AL operation when disabling another filter
 
-	private var filter:ALFilter = null;
+	private var filter:Int = null;
 
 	/**
      * Loads in an ALFilter of type `type` and attaches it to the `sndRef`.
@@ -56,11 +56,11 @@ class FilterBase extends FXBase {
 
 	function get_enabled():Bool return enabled_;
 
-	function reapplyFilter():Void AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter);
+	function reapplyFilter():Void { AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter); }
 
 	public static function makeFilter(type:ALFilterType):ALFilter {
-		var fl = AL.createFilter();
-		AL.filteri(fl, ALFilterTypeParam.FILTER_TYPE, type);
+		var fl = AL_EFX.createFilter();
+		AL_EFX.filteri(fl, ALFilterTypeParam.FILTER_TYPE, type);
 
 		return fl;
 	}
