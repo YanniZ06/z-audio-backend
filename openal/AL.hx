@@ -170,12 +170,8 @@ extern class AL {
             return into;
         }
 
-        public static function deleteBuffers(buffers:Array<ALuint>) : Void {
-            var _i = 0;
-            while(_i < n) {
-                deleteBuffer(buffers[_i]);
-                ++_i;
-            }
+        public static inline function deleteBuffers(buffers:Array<ALuint>) : Void {
+            for(buffer in buffers) deleteBuffer(buffer);
         }
 
             @:native('alIsBuffer')

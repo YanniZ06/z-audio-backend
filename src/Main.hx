@@ -9,7 +9,8 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
-		SoundHandler.init();
+		SoundHandler.init(true);
+		SoundHandler.initSettings();
 
 		flixel.FlxG.autoPause = false;
 		addChild(new FlxGame(0, 0, tests.PlayState));

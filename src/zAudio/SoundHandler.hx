@@ -1,5 +1,9 @@
 package zAudio;
 
+import openal.AL.Context;
+import openal.AL.Device;
+import openal.AL.ALC;
+
 import lime.app.Application;
 import lime.ui.Window;
 import lime.media.AudioManager;
@@ -58,11 +62,41 @@ class SoundHandler {
 
     private static var windowEvents:Map<String, Bool> = [];
 
+    public static var device:Device = null;
+    public static var context:Context = null;
+    public static var attributes:Array<Int> = [];
+    public static var efx_available(get, never):Bool;
+    public static var max_efx_per_sound:Int = 0;
+    static function get_efx_available():Bool return AL_EFX.efxExtAvailable;
+
     /**
-     * Sets up the zAudio backend, should be called on Main `before` starting your game
-	 * and `after` all SoundHandler options have been set to your preferred choice.
+     * Sets up the zAudio backend, should be called on Main `before` starting your game.
+     * 
+     * Alternatively you can initialize openal yourself and skip this function (not recommended).
+     * 
+     * After initializing you should set your SoundHandler settings to what you want them to be,
+     * and finalize by calling `initSettings();`
+     * @param allowEFX If true, enables and allows the effects extension (if available)
      */
-    public static function init() {
+    public static function init(allowEFX:Bool = true) {
+        final MAX_AUXILIARY_SENDS:Int = 0x20003;
+
+        device = ALC.openDevice(null);
+        AL_EFX.efxExtAvailable = AL.isExtensionPresent("ALC_EXT_EFX"); //ALT: ALC EXT EFX ??
+
+        context =  ALC.createContext(device, efx_available ? [MAX_AUXILIARY_SENDS, 15] : null);
+        ALC.makeContextCurrent(context);
+
+        //max_efx_per_sound = efx_available ? ALC.getIntegerv(device, MAX_AUXILIARY_SENDS, 1)[0] : 0;
+        //trace(max_efx_per_sound);
+        
+        if(allowEFX) {
+            if(!efx_available) trace("AL NOTICE: THE EFX EXTENSION IS NOT AVAILABLE ON THIS DEVICE!");
+            else AL_EFX.loadEFX();
+        }
+    }
+
+    public static function initSettings() {
         AL.listenerf(AL.GAIN, globalVolume);
         //Initialize all settings on startup.
         //We dont trigger the setter twice as these are only triggered if the variable has the same value (which doesnt activate the setter)

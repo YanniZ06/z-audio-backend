@@ -312,7 +312,7 @@ class Sound extends SoundFXLoader implements SoundBaseI {
 
         var buf:BufferHandle = BufferHandle.copyFrom(buffer); //AL forced my hand, im so sorry. Nothing else worked. Really, I tried.
         var data = b ? buf.reverseData : buf.data;
-        AL.bufferData(buf.handle, buf.format, data, buf.dataLength, buf.sampleRate);
+        AL.bufferData(buf.handle, buf.format, buf.sampleRate, data.getData(), 0, buf.dataLength);
 
         reverseChange = true; //Ensures we dont try changing the cache address
         changeBuffer(buf);

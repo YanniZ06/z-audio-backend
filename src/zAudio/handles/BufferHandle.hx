@@ -40,7 +40,7 @@ class BufferHandle
 		this.sampleRate = sampleRate;
 
 		format = resolveFormat(bitsPerSample, channels);
-		AL.bufferData(handle, format, data, dataLength, sampleRate);
+		AL.bufferData(handle, format, sampleRate, data.getData(), 0, dataLength);
 		samples = Std.int((dataLength * 8) / (channels * bitsPerSample));
 
 		@:privateAccess if(parentSource != null) {
@@ -60,7 +60,7 @@ class BufferHandle
 		if(reverseData != null) return;
 
 		var data_:UInt8Array = UInt8Array.fromBytes(data);
-		var reversed:UInt8Array = new UInt8Array();
+		var reversed:UInt8Array = new UInt8Array(data_.length);
 		for(byteI in 0...data_.length)
 			reversed.set(byteI, data_.get(data_.length - byteI)); //Set byte from back of data array to front of reversed array
 		reverseData = reversed.getData().bytes; //cast reversed;

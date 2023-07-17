@@ -1,5 +1,8 @@
 package zAudio;
 
+import cpp.Star;
+import cpp.Reference;
+
 /**
  * Class that handles AL EFX extension functions and documents them.
  * Run "AL_EFX.loadEFX()" on boot lol 
@@ -7,40 +10,47 @@ package zAudio;
 class AL_EFX {
     static var efx_functions:EFX_Container = new EFX_Container();
 
+    /**
+     * Whether the efx extension is available or not. If false, loadEFX is automatically is automatically not run.
+     */
+    public static var efxExtAvailable:Bool = false;
+    /**
+     * Loads in all EFX functions, as long as `efxExtAvailable` is true.
+     */
     public static function loadEFX() {
-        var efxExtAvailable:Bool = false;
+        if (!efxExtAvailable) return;
 
-        if (AL.isExtensionPresent("ALC EXT EFX"))
-            efxExtAvailable = true;
+        efx_functions.genEffects = cast AL.getProcAddress("alGenEffects");
+        efx_functions.deleteEffects = cast AL.getProcAddress("alDeleteEffects");
 
-        trace(efxExtAvailable);
-
-        if (efxExtAvailable) {
-            efx_functions.genEffects = cast(AL.getProcAddress("alGenEffects"), (Int, Int)->Void);
-            efx_functions.deleteEffects = cast(AL.getProcAddress("alDeleteEffects"), (Int, Int)->Void);
-
-            efx_functions.effecti = cast(AL.getProcAddress("alEffecti"), (Int, Int, Int)->Void);
-            efx_functions.getEffecti = cast(AL.getProcAddress("alGetEffecti"), (Int, Int, Int)->Void);
-            efx_functions.effectf = cast(AL.getProcAddress("alEffectf"), (Int, Int, Float)->Void);
-            efx_functions.getEffectf = cast(AL.getProcAddress("alGetEffectf"), (Int, Int, Float)->Void);
-            efx_functions.effectiv = cast(AL.getProcAddress("alEffectiv"), (Int, Int, Array<Int>)->Void);
-            efx_functions.getEffectiv = cast(AL.getProcAddress("alGetEffectiv"), (Int, Int, Array<Int>)->Void);
-            efx_functions.effectfv = cast(AL.getProcAddress("alEffectfv"), (Int, Int, Array<Float>)->Void);
-            efx_functions.getEffectfv = cast(AL.getProcAddress("alGetEffectfv"), (Int, Int, Array<Float>)->Void);
+        efx_functions.effecti = cast AL.getProcAddress("alEffecti");
+        efx_functions.getEffecti = cast AL.getProcAddress("alGetEffecti");
+        efx_functions.effectf = cast AL.getProcAddress("alEffectf");
+        efx_functions.getEffectf = cast AL.getProcAddress("alGetEffectf");
+        efx_functions.effectiv = cast AL.getProcAddress("alEffectiv");
+        efx_functions.getEffectiv = cast AL.getProcAddress("alGetEffectiv");
+        efx_functions.effectfv = cast AL.getProcAddress("alEffectfv");
+        efx_functions.getEffectfv = cast AL.getProcAddress("alGetEffectfv");
 
 
-            efx_functions.genFilters = cast(AL.getProcAddress("alGenFilters"), (Int, Int)->Void);
-            efx_functions.deleteFilters = cast(AL.getProcAddress("alDeleteFilters"), (Int, Int)->Void);
+        efx_functions.genFilters = cast AL.getProcAddress("alGenFilters");
+        efx_functions.deleteFilters = cast AL.getProcAddress("alDeleteFilters");
 
-            efx_functions.filteri = cast(AL.getProcAddress("alFilteri"), (Int, Int, Int)->Void);
-            efx_functions.getFilteri = cast(AL.getProcAddress("alGetFilteri"), (Int, Int, Int)->Void);
-            efx_functions.filterf = cast(AL.getProcAddress("alFilterf"), (Int, Int, Float)->Void);
-            efx_functions.getFilterf = cast(AL.getProcAddress("alGetFilterf"), (Int, Int, Float)->Void);
-            efx_functions.filteriv = cast(AL.getProcAddress("alFilteriv"), (Int, Int, Array<Int>)->Void);
-            efx_functions.getFilteriv = cast(AL.getProcAddress("alGetFilteriv"), (Int, Int, Array<Int>)->Void);
-            efx_functions.filterfv = cast(AL.getProcAddress("alFilterfv"), (Int, Int, Array<Float>)->Void);
-            efx_functions.getFilterfv = cast(AL.getProcAddress("alGetFilterfv"), (Int, Int, Array<Float>)->Void);
-        }
+        efx_functions.filteri = cast AL.getProcAddress("alFilteri");
+        efx_functions.getFilteri = cast AL.getProcAddress("alGetFilteri");
+        efx_functions.filterf = cast AL.getProcAddress("alFilterf");
+        efx_functions.getFilterf = cast AL.getProcAddress("alGetFilterf");
+        efx_functions.filteriv = cast AL.getProcAddress("alFilteriv");
+        efx_functions.getFilteriv = cast AL.getProcAddress("alGetFilteriv");
+        efx_functions.filterfv = cast AL.getProcAddress("alFilterfv");
+        efx_functions.getFilterfv = cast AL.getProcAddress("alGetFilterfv");
+
+        efx_functions.genAuxiliaryEffectSlots = cast AL.getProcAddress("alGenAuxiliaryEffectSlots");
+        efx_functions.deleteAuxiliaryEffectSlots = cast AL.getProcAddress("alDeleteAuxiliaryEffectSlots");
+        efx_functions.auxiliaryEffectSloti = cast AL.getProcAddress("alAuxiliaryEffectSloti");
+        efx_functions.getAuxiliaryEffectSloti = cast AL.getProcAddress("alGetAuxiliaryEffectSloti");
+        efx_functions.auxiliaryEffectSlotf = cast AL.getProcAddress("alAuxiliaryEffectSlotf");
+        efx_functions.getAuxiliaryEffectSlotf = cast AL.getProcAddress("alGetAuxiliaryEffectSlotf");
     }
 
     /*
@@ -62,7 +72,7 @@ class AL_EFX {
      * @return The AL effect ready for usage.
      */
     public static function createEffect():Int {
-        var effect:Int;
+        var effect:Int = 0;
         efx_functions.genEffects(1, effect);
         return effect;
     }
@@ -71,10 +81,8 @@ class AL_EFX {
      * Deletes the given AL effect.
      * @param effect The effect to delete.
      */
-    public static function deleteEffect(effect:Int):Void {
+    public static function deleteEffect(effect:Int):Void
         efx_functions.deleteEffects(1, effect);
-        effect = null;
-    }
 
     // -- (1) -- //
 
@@ -190,10 +198,8 @@ class AL_EFX {
      * Deletes the given AL filter.
      * @param filter The filter to delete.
      */
-    public static function deleteFilter(filter:Int):Void {
+    public static function deleteFilter(filter:Int):Void
         efx_functions.deleteFilters(1, filter);
-        filter = null;
-    }
 
     // -- (1) -- //
 
@@ -289,7 +295,81 @@ class AL_EFX {
 
     // -- (2.2) -- //
     // -- (2) -- //
-    // -- (END OF FILTERS) -- //
+    // -- END OF FILTERS -- //
+
+    // -- AUXILIARY EFFECT SLOTS -- //
+    // -- (1) CREATION AND DELETION -- //
+
+    /**
+     * Creates an auxiliary effect slot.
+     * @return The created auxiliary effect slot.
+     */
+    public static function createAuxSlot():Int {
+        var aux:Int = 0;
+        efx_functions.genAuxiliaryEffectSlots(1, aux);
+        return aux;
+    }
+
+    /**
+     * Deletes the given auxiliary effect slot.
+     * @param aux The auxiliary effect slot to delete.
+     */
+    public static function deleteAuxSlot(aux:Int)
+        efx_functions.deleteAuxiliaryEffectSlots(1, aux);
+
+    // -- (1) -- //
+
+    // -- (2) PARAMETER GETTING AND SETTING -- //
+    /**
+     * Sets the integer value of the aux-slot parameter `param` of `auxSlot`.
+     * @param auxSlot The aux-slot to set the value of.
+     * @param param The parameter you want to modify.
+     * @param value The new integer value to assign to that parameter.
+     */
+    public static function auxi(auxSlot:Int, param:Int, value:Int):Void 
+        efx_functions.auxiliaryEffectSloti(auxSlot, param, value);
+
+    /**
+     * Gets the integer value of the aux-slot parameter `param` of `auxSlot`.
+     * @param auxSlot The aux-slot to get the value from.
+     * @param param The parameter whichs value you want.
+     * @return The value of `param`.
+     */
+    public static function getAuxi(auxSlot:Int, param:Int):Int {
+        var retValue:Int = 0;
+        efx_functions.getAuxiliaryEffectSloti(auxSlot, param, retValue);
+        return retValue;
+    }
+
+    /**
+     * Sets the float value of the aux-slot parameter `param` of `auxSlot`.
+     * @param auxSlot The aux-slot to set the value of.
+     * @param param The parameter you want to modify.
+     * @param value The new float value to assign to that parameter.
+     */
+    public static function auxf(auxSlot:Int, param:Int, value:Float):Void
+        efx_functions.auxiliaryEffectSlotf(auxSlot, param, value);
+
+    /**
+     * Gets the float value of the aux-slot parameter `param` of `auxSlot`.
+     * @param auxSlot The aux-slot to get the value from.
+     * @param param The parameter whichs value you want.
+     * @return The value of `param`.
+     */
+    public static function getAuxf(auxSlot:Int, param:Int):Float {
+        var retValue:Float = 0.0;
+        efx_functions.getAuxiliaryEffectSlotf(auxSlot, param, retValue);
+        return retValue;
+    }
+
+    // -- (2) -- //
+    // -- END OF AUXILIARY EFFECT SLOTS -- //
+
+    // -- SOURCE MANIPULATION -- //
+    static final DIRECT_FILTER:Int = 0x20005;
+    public static function applyDirectFilter(src:Int, filter:Int) AL.sourcei(src, DIRECT_FILTER, filter);
+    public static function removeDirectFilter(src:Int) AL.sourcei(src, DIRECT_FILTER, zAudio.FilterBase.ALFilterType.FILTER_NULL);
+    // -- END OF SOURCE MANIPULATION -- //
 }
 
 class EFX_Container { //storeAddress named params types = return types, return those values after calling function
@@ -319,4 +399,13 @@ class EFX_Container { //storeAddress named params types = return types, return t
     public var getFilterf:Int->Int->Float->Void = (filterID, param, storeAddress) -> {};
     public var filterfv:Int->Int->Array<Float>->Void = (filterID, param, values) -> {};
     public var getFilterfv:Int->Int->Array<Float>->Void = (filterID, param, storeAddress) -> {};
+
+
+    public var genAuxiliaryEffectSlots:Int->Int->Void = (numSlots, auxID) -> {};
+    public var deleteAuxiliaryEffectSlots:Int->Int->Void = (numSlots, auxID) -> {};
+
+    public var auxiliaryEffectSloti:Int->Int->Int->Void = (slotID, param, value) -> {};
+    public var getAuxiliaryEffectSloti:Int->Int->Int->Void = (slotID, param, storeAddress) -> {};
+    public var auxiliaryEffectSlotf:Int->Int->Float->Void = (slotID, param, value) -> {};
+    public var getAuxiliaryEffectSlotf:Int->Int->Float->Void = (slotID, param, storeAddress) -> {};
 }

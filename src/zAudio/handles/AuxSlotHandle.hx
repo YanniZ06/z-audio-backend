@@ -33,8 +33,8 @@ class AuxSlotHandle
 		appliedFX = effect = cast inputFX;
 		auxID = getAuxID_FX(type);
 
-		handle = AL.createAux();
-		AL.auxi(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, effect); // Apply effect to the aux
+		handle = AL_EFX.createAuxSlot();
+		AL_EFX.auxi(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, effect); // Apply effect to the aux
 	}
 
 	/**
@@ -65,20 +65,10 @@ class AuxSlotHandle
 		if (appliedSrc != null)
 			removeFromSrc();
 
-		deleteAuxSlot(handle);
+		AL_EFX.deleteAuxSlot(handle);
 		handle = null;
 		if(appliedFX != null) EffectBase.deleteEffect(appliedFX);
 		appliedFX = null;
-	}
-
-	/**
-	 * Deletes the ALAuxiliaryEffectSlot `slot`.
-	 * @param slot The ALAuxiliaryEffectSlot to delete.
-	 */
-	public static function deleteAuxSlot(slot:ALAuxiliaryEffectSlot) {
-		#if (lime_cffi && lime_openal && !macro)
-		LimeAudioCFFI.lime_al_delete_auxiliary_effect_slot(slot);
-		#end
 	}
 
 	/**
@@ -106,7 +96,7 @@ class AuxSlotHandle
 
 	function set_volume(vol:Float):Float
 	{
-		AL.auxf(handle, ALAuxSlotParam.EFFECTSLOT_GAIN, vol);
+		AL_EFX.auxf(handle, ALAuxSlotParam.EFFECTSLOT_GAIN, vol);
 		volume = vol;
 		return vol;
 	}

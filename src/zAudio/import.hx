@@ -5,3 +5,5 @@ import zAudio.handles.*;
 import openal.*;
 
 import zAudio.AL_EFX;
+
+using cpp.Native;

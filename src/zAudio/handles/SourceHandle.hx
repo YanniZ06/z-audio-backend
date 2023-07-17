@@ -5,7 +5,7 @@ package zAudio.handles;
  */
 class SourceHandle
 {
-	public var handle:Int = null;
+	public var handle:Null<Int> = null;
 	public var buffer:BufferHandle = null;
 	public var parentSound:Sound = null;
 	public var hasFilter:Bool = false;
@@ -53,7 +53,7 @@ class SourceHandle
 		if(AL.getSourcei(handle, AL.SOURCE_STATE) != AL.STOPPED) //Gotta make sure we reset everything, cant just check for the sound playing
 			parentSound.stop();
 		
-		AL.sourcei(handle, AL.BUFFER, null);
+		AL.sourcei(handle, AL.BUFFER, AL.NONE);
 		buffer.parentSource = null;
 		
 		buffer.destroy();
