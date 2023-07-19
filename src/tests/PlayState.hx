@@ -21,14 +21,14 @@ class PlayState extends FlxState
 	override public function create()
 	{
 		super.create();
-		var soundInfo = SoundLoader.fromFile("assets/snd/wavTest.wav", true);
+		/*var soundInfo = SoundLoader.fromFile("assets/snd/wavTest.wav", true);
 		// trace(soundInfo);
 		snd2 = new ZSound(soundInfo);
 		snd2.time = 6000;
 		//snd2.play();
-		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));
+		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));*/
 
-		snd = new ZSound(SoundLoader.fromFile("assets/snd/never_forgetting.ogg"));
+		snd = new ZSound(SoundLoader.fromFile("assets/snd/mp3Test.mp3"));
 		snd.bandpass.enabled = true;
 		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
@@ -109,7 +109,14 @@ class PlayState extends FlxState
 			SoundHandler.globalVolume += 0.1 * (negMod * mod);
 			//trace(SoundHandler.globalVolume);
 		}
+		if(FlxG.keys.justPressed.NUMPADPLUS) {
+			SoundHandler.globalVolume = Math.min(1, SoundHandler.globalVolume + 0.1);
+		}
+		if(FlxG.keys.justPressed.NUMPADMINUS) {
+			SoundHandler.globalVolume = Math.max(0, SoundHandler.globalVolume - 0.1);
+		}
 		if(FlxG.keys.justPressed.K) {
+			FlxTween.cancelTweensOf(snd);
 			SoundHandler.removeFromMemory(snd);
 			//SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");

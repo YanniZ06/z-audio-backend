@@ -90,11 +90,28 @@ class SoundLoader
 	 * Check out your sounds' `buffer.preloadReverseData()` field for a way to preload the reverse data later.
 	 * @return A Buffer that stores the byte information.
 	 */
-	 public static function from_wav(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
+	public static function from_wav(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
 		var cached = checkCache(filePath);
 		if(cached != null) return cached;
 
 		return wavLoad(bytes, filePath, preloadReverse);
+	}
+
+	/**
+	 * Generates all information necessary to load Sound from the given `bytes` input.
+	 * 
+	 * If a file with the same path has been loaded in already, no new Buffer is generated and that one is taken instead.
+	 * @param bytes Raw byte data to generate Sound-data from, bytes must be encoded in mp3 format!
+	 * @param fileName The path of the file these bytes are tied to. Must be set to ensure there is no duplicate data in memory.
+	 * @param preloadReverse If true, preloads reverse sound data for the sound (unless its already been preloaded).
+	 * Check out your sounds' `buffer.preloadReverseData()` field for a way to preload the reverse data later.
+	 * @return A Buffer that stores the byte information.
+	 */
+	public static function from_mp3(bytes:Bytes, filePath:String, preloadReverse:Bool = true):BufferHandle {
+		var cached = checkCache(filePath);
+		if(cached != null) return cached;
+
+		return mp3Load(bytes, filePath, preloadReverse);
 	}
 
 	//Avoid checking cache twice lol
@@ -145,6 +162,20 @@ class SoundLoader
 		return getCache(filePath);
 	}
 
+	//Must i repeat myself
+	private static function mp3Load(bytes:Bytes, filePath:String, preloadReverse:Bool) {
+		final mp3Info = MiniMP3.decodeMP3(bytes);
+		
+		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(mp3Info.channels, 16, resolveDataFromBytes(mp3Info.data), mp3Info.sampleRate, preloadReverse));
+
+		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
+		var addressContainer = SoundHandler.activeSounds[filePath];
+		if(addressContainer == null) SoundHandler.activeSounds.set(filePath, {cacheExists: true, hasReverseCache: preloadReverse, sounds: []});
+		else addressContainer.cacheExists = true;
+
+		return getCache(filePath);
+	}
+
 	static function checkCache(address:String):BufferHandle {
 		var duplicate:BufferHandle = SoundHandler.existingBufferData[address];
 		if(duplicate != null) {
@@ -175,7 +206,7 @@ class SoundLoader
 			default:
 				switch ([bytes.get(0), bytes.get(1), bytes.get(2)])
 				{
-					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: throw 'MP3 audio is not supported on this backend!';
+					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return mp3Load(bytes, path, preloadReverse);
 					default: throw 'Invalid sound format or file-header "$fileSignature"!';
 				}
 		}
