@@ -27,7 +27,7 @@ typedef CFFIPointer = Dynamic;
 #end
 
 /**
- * Native Lime AL Bindings that are not present in NativeCFFI for odd reasons, just adds in effect and filter deletion capabilities
+ * Native Lime AL Bindings that are not present in NativeCFFI for odd reasons, just adds in efx deletion/cleanup capabilities
  */
 #if !lime_debug
 @:fileXml('tags="haxe,release"')
