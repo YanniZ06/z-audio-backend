@@ -28,7 +28,7 @@ class EffectBase extends FXBase {
 	}
 
 	override public function destroy() {
-		aux.removeFromSrc();
+		//if(aux.appliedSrc != null) aux.removeFromSrc();
 		super.destroy();
 
 		aux.destroy();

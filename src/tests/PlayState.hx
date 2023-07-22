@@ -1,5 +1,6 @@
 package tests;
 
+import cpp.vm.Gc;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.system.FlxAssets.FlxSoundAsset;
@@ -35,13 +36,14 @@ class PlayState extends FlxState
 		snd.looping = true;
 		//snd.position.x = 80;
 
-		function loop_low() {
+		function loop_low() { //loops bandpass filter weewooo
 			var twn:FlxTween;
 			twn = FlxTween.tween(snd, {"bandpass.gain_hf": 0.1, "bandpass.gain_lf": 1}, 2, {onComplete: (_) -> {
 				twn = FlxTween.tween(snd, {"bandpass.gain_hf": 1, "bandpass.gain_lf": 0.1}, 2, {onComplete: (_) -> loop_low()});
 			}});
 		}
-		loop_low();
+		//loop_low();
+
 		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
@@ -65,6 +67,7 @@ class PlayState extends FlxState
 		tmr.run = () -> snd_.stop();*/
 	}
 
+	var gcActive:Bool = false;
 	//This is scuffy ik but i need to QUICKLY test
 	override public function update(elapsed:Float)
 	{
@@ -73,6 +76,14 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.C) {
 			SoundHandler.clear_bufferCache();
 			trace("CACHE HAS BEEN CLEARED!");
+		}
+		if(FlxG.keys.justPressed.M) {
+			trace("GC CALLED!!!");
+			Gc.enable(!gcActive);
+			Gc.run(true);
+			Gc.compact();
+			gcActive = !gcActive;
+			trace("GC ACTIVE: " + gcActive);
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
@@ -119,6 +130,7 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);
 			SoundHandler.removeFromMemory(snd);
+			snd = null;
 			//SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");
 		}

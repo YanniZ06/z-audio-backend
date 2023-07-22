@@ -23,7 +23,7 @@ class FilterBase extends FXBase {
 	}
 
 	/**
-	 * Destroys this Filter and its auxSlot and renders them unuseable, also freeing their allocated memory.
+	 * Destroys this Filter and renders it unuseable, also freeing its allocated memory.
 	 */
 	override public function destroy() {
 		enabled = false;
