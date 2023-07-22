@@ -82,7 +82,6 @@ class PlayState extends FlxState
 		FlxG.watch.addQuick("Pitch:", snd.pitch);
 		FlxG.watch.addQuick("Length:", snd.length);
 		@:privateAccess FlxG.watch.addQuick("Done Playing:", snd.finished || snd.finishedReverse);
-		FlxG.watch.addQuick("Playing:", snd.playing);
 		FlxG.watch.addQuick("Volume:", snd.volume);
 		if(FlxG.keys.justPressed.S) snd.stop();
 		if(FlxG.keys.justPressed.P) snd.pause();
@@ -106,14 +105,16 @@ class PlayState extends FlxState
 		}
 		if(FlxG.keys.justPressed.L) {
 			//snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
-			SoundHandler.globalVolume += 0.1 * (negMod * mod);
+			snd.reverb.enabled = !snd.reverb.enabled;
 			//trace(SoundHandler.globalVolume);
 		}
-		if(FlxG.keys.justPressed.NUMPADPLUS) {
-			SoundHandler.globalVolume = Math.min(1, SoundHandler.globalVolume + 0.1);
+		if(FlxG.keys.justPressed.B) {
+			//SoundHandler.globalVolume = Math.min(1, SoundHandler.globalVolume + 0.1);
+			snd.reverb.gain = Math.min(1, Math.max(0, snd.reverb.gain + ((0.1 * negMod) * mod)));
+			FlxG.watch.addQuick("Reverbed Gain:", snd.reverb.gain);
 		}
 		if(FlxG.keys.justPressed.NUMPADMINUS) {
-			SoundHandler.globalVolume = Math.max(0, SoundHandler.globalVolume - 0.1);
+			//SoundHandler.globalVolume = Math.max(0, SoundHandler.globalVolume - 0.1);
 		}
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);

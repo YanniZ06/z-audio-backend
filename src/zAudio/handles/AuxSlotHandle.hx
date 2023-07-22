@@ -34,6 +34,7 @@ class AuxSlotHandle
 
 		handle = AL.createAux();
 		AL.auxi(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, effect); // Apply effect to the aux
+		AL.auxi(handle, ALAuxSlotParam.EFFECTSLOT_AUXILIARY_SEND_AUTO, AL.FALSE);
 	}
 
 	/**
@@ -42,8 +43,8 @@ class AuxSlotHandle
 	 */
 	public function applyTo(src:SourceHandle)
 	{
-		var castedFilter:CFFIPointer = cast appliedFilter;
-		AL.source3i(src.handle, AL.AUXILIARY_SEND_FILTER, handle, auxID, cast(castedFilter.get(), Int) ?? AL.FILTER_NULL);
+		//var castedFilter:CFFIPointer = cast appliedFilter;
+		AL.source3i(src.handle, AL.AUXILIARY_SEND_FILTER, handle, auxID, /*cast(castedFilter.get(), Int) ??*/ AL.FILTER_NULL);
 		appliedSrc = src;
 	}
 

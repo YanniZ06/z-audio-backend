@@ -1,6 +1,7 @@
 package zAudio;
 
 import zAudio.filters.*;
+import zAudio.fx.*;
 
 /**
  * A simple class that loads all Sound Effects into a sound.
@@ -9,6 +10,7 @@ import zAudio.filters.*;
  */
 class SoundFXLoader {
     //EFFECTS
+    public var reverb:ReverbFX;
     //FILTERS
     /**
      * The lowpass on this sound.
@@ -31,6 +33,9 @@ class SoundFXLoader {
     private var activeFilter:Dynamic = null;
 
     public function loadFX(sndParent:Sound) {
+        reverb = new ReverbFX(sndParent);
+
+
         lowpass = new LowpassFilter(sndParent);
         highpass = new HighpassFilter(sndParent);
         bandpass = new BandpassFilter(sndParent);
@@ -38,6 +43,10 @@ class SoundFXLoader {
 
     //Gets rid of all filters and sound effects
     public function destroy() {
+        reverb.destroy();
+        reverb = null;
+
+
         lowpass.destroy();
         lowpass = null;
         highpass.destroy();

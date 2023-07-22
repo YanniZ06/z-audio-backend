@@ -1,9 +1,16 @@
 package zAudio;
 
+import zAudio.fx.ReverbFX;
+
 /**
  * The base for all sound effect modifiers.
  */
-class EffectBase extends FXBase {
+class EffectBase extends FXBase {	
+	/**
+	 * Controls whether this Effect should be enabled right now or not.
+	 */
+	public var enabled(default, set):Bool;
+
 	public var mix(get, set):Float;
 
 	private var effect:ALEffect = null;
@@ -17,7 +24,7 @@ class EffectBase extends FXBase {
 	private function new(sndRef:Sound, type:ALEffectType) {
 		super(sndRef);
 		effect = makeEffect(type);
-		aux = new AuxSlotHandle(effect, type, true);
+		aux = new AuxSlotHandle(effect, type);
 	}
 
 	override public function destroy() {
@@ -46,6 +53,31 @@ class EffectBase extends FXBase {
 		LimeAudioCFFI.lime_al_delete_effect(effect);
 		#end
 	}
+
+	function changeParam(param:Dynamic, value:Float) {
+		trace(AL.getErrorString());
+		AL.effectf(effect, 0x0003, value); //why do you suddenly refuse to work??
+		AL.effectf(effect, 0x0003, 0);
+		AL.effectf(effect, 0x0005, 19);
+		if(enabled) reapplyEffect();
+		trace(AL.getErrorString());
+		trace(effect);
+		trace(param);
+		trace(value);
+	}
+
+	function set_enabled(val:Bool):Bool {
+		final oldE = enabled;
+		enabled = val;
+		if(oldE == enabled) return val;
+
+		if(enabled) reapplyEffect();
+		else aux.removeFromSrc();
+
+		return val;
+	}
+
+	function reapplyEffect():Void { aux.applyTo(sourceRef); trace("reapplied!"); }
 
 	function get_mix():Float return aux.volume;
 	function set_mix(val:Float):Float { aux.volume = val; return val; }

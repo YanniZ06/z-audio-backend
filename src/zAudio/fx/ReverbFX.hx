@@ -5,11 +5,12 @@ import zAudio.EffectBase.ALEffectType;
 /**
  * The classic reverb effect.
  */
+@:build(zAudio.fx.FXPropertyGenMacro.genFxParams())
 class ReverbFX extends EffectBase {
 	/**
 	 * Controls the coloration of the late reverb. Lowering the value adds more coloration to the late reverb.
 	 */
-	public var density:Float = 1.0;
+	@fxParam(0x0001) public var density:Float = 1.0;
 
 	/**
 	 * Controls the echo density in the reverberation decay. 
@@ -19,7 +20,7 @@ class ReverbFX extends EffectBase {
 	 * 
 	 * If you set a diffusion value of 0.0, the later reverberation sounds like a succession of distinct echoes.
 	 */
-	public var diffusion:Float = 1.0;
+	@fxParam(0x0002) public var diffusion:Float = 1.0;
 
 	/**
 	 * The master volume control for the reflected sound (both early reflections and reverberation) that the reverb effect adds to all sound sources. 
@@ -27,7 +28,7 @@ class ReverbFX extends EffectBase {
 	 * 
 	 * The value of the Gain property ranges from 1.0 (0db) (the maximum amount) to 0.0 (-100db) (no reflected sound at all). 
 	 */
-	public var gain:Float = 0.32;
+	@fxParam(0x0003) public var gain:Float = 0.32;
 
 	/**
 	 * Further tweaks reflected sound by attenuating it at high frequencies.
@@ -35,14 +36,14 @@ class ReverbFX extends EffectBase {
 	 * 
 	 * The value of the Gain HF property ranges from 1.0 (0db) (no filter) to 0.0 (-100db) (virtually no reflected sound).
 	 */
-	public var gain_hf:Float = 0.89;
+	@fxParam(0x0004) public var gain_hf:Float = 0.89;
 
 	/**
 	 * Sets the reverberation decay time, in seconds.
 	 * 
 	 * It ranges from 0.1 (typically a small room with very dead surfaces) to 20.0 (typically a large room with very live surfaces). 
 	 */
-	public var decayTime:Float = 1.49;
+	@fxParam(0x0005) public var decayTime:Float = 1.49;
 
 	/**
 	 * The Decay HF Ratio property sets the spectral quality of the Decay Time parameter. 
@@ -57,7 +58,7 @@ class ReverbFX extends EffectBase {
 	 * 
 	 * The value ranges from 0.1 to 2.0.
 	 */
-	public var decay_hfRatio:Float = 0.83;
+	@fxParam(0x0006) public var decay_hfRatio:Float = 0.83;
 
 
 	/**
