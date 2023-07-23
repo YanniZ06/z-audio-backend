@@ -21,6 +21,7 @@ class PlayState extends FlxState
 	var snd2:ZSound;
 	override public function create()
 	{
+
 		super.create();
 		/*var soundInfo = SoundLoader.fromFile("assets/snd/wavTest.wav", true);
 		// trace(soundInfo);
@@ -29,8 +30,8 @@ class PlayState extends FlxState
 		//snd2.play();
 		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));*/
 
-		snd = new ZSound(SoundLoader.fromFile("assets/snd/mp3Test.mp3"));
-		snd.bandpass.enabled = true;
+		snd = new ZSound(SoundLoader.fromFile("assets/snd/michealMp3.mp3"));
+		snd.bandpass.enabled = false;
 		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
 		snd.looping = true;
@@ -84,6 +85,7 @@ class PlayState extends FlxState
 			Gc.compact();
 			gcActive = !gcActive;
 			trace("GC ACTIVE: " + gcActive);
+			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${zAudio.SoundHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${zAudio.SoundHandler.existingBufferData} }');
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
@@ -116,8 +118,11 @@ class PlayState extends FlxState
 		}
 		if(FlxG.keys.justPressed.L) {
 			//snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
-			snd.reverb.enabled = !snd.reverb.enabled;
+			//snd.reverb.enabled = !snd.reverb.enabled;
 			//trace(SoundHandler.globalVolume);
+			trace("GC INFO ZSOUND:");
+			trace(Gc.trace(Type.getClass(snd)));
+			trace("\n\nCURRENT FULL MEMORY: " + Gc.memInfo(Gc.MEM_INFO_CURRENT) + "\nRESERVED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_RESERVED) + "\nNEEDED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_USAGE));
 		}
 		if(FlxG.keys.justPressed.B) {
 			//SoundHandler.globalVolume = Math.min(1, SoundHandler.globalVolume + 0.1);
@@ -129,7 +134,7 @@ class PlayState extends FlxState
 		}
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);
-			SoundHandler.removeFromMemory(snd);
+			SoundHandler.removeFromMemory(snd, true);
 			snd = null;
 			//SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");

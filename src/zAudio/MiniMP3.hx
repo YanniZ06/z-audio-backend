@@ -1782,6 +1782,7 @@ class MiniMP3
 
         var mp3Bytes:Bytes = rawBufferToBytes(raw,totSampleCount);
 
+        trace("Generated new mp3.");
         return
         {
             data:mp3Bytes,

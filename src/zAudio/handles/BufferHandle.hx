@@ -17,6 +17,11 @@ class BufferHandle
 	public var format:Int = AL.FORMAT_MONO8;
 	public var parentSource:SourceHandle = null;
 
+	/**
+	 * Called after destroy is completed, to clean up any other related variables (for mp3's to name an example)
+	 */
+	public var onCleanup:Void->Void = () -> {};
+
 	public function new(buffer:ALBuffer) {
 		handle = buffer;
 	}
@@ -89,6 +94,8 @@ class BufferHandle
 		data = null;
 		reverseData = null;
 		cacheAddress = null;
+
+		onCleanup();
 	}
 	
 	/**
@@ -104,6 +111,7 @@ class BufferHandle
 		var b:BufferHandle = new BufferHandle(AL.createBuffer());
 		if(b2.data != null) b.fill(b2.channels, b2.bitsPerSample, b2.data, b2.sampleRate, false);
 		if(b2.reverseData != null) b.reverseData = b2.reverseData;
+		//b.onCleanup = b2.onCleanup; //gotta make sure its copied over to the clones aswell
 
 		return b;
 	}

@@ -167,7 +167,7 @@ class SoundLoader
 		final mp3Info = MiniMP3.decodeMP3(bytes);
 		
 		SoundHandler.existingBufferData.set(filePath, new BufferHandle(AL.createBuffer()).fill(mp3Info.channels, 16, resolveDataFromBytes(mp3Info.data), mp3Info.sampleRate, preloadReverse));
-
+		SoundHandler.existingBufferData[filePath].onCleanup = () -> { cpp.Native.free(cpp.NativeArray.address(mp3Info.data.getData(), 0).ptr); };
 		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 		var addressContainer = SoundHandler.activeSounds[filePath];
 		if(addressContainer == null) SoundHandler.activeSounds.set(filePath, {cacheExists: true, hasReverseCache: preloadReverse, sounds: []});

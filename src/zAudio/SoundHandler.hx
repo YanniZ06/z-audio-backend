@@ -40,7 +40,7 @@ class SoundHandler {
      * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
      * to prevent audio desyncing.
      */
-    private static inline var foc_lost_def:Bool = true; //!!!! SET TO TRUE
+    private static inline var foc_lost_def:Bool = false; //!!!! SET TO TRUE
 	public static var focusLost_pauseSnd(default, set):Bool = foc_lost_def;
 
     /**
@@ -112,8 +112,7 @@ class SoundHandler {
      */
     public static function removeFromCache(path:String):Void {
         var buf = existingBufferData[path];
-        if(activeSounds[path].sounds.length < 1) activeSounds.remove(path);
-        else activeSounds[path].cacheExists = false;
+        if(activeSounds[path] != null) activeSounds[path].cacheExists = false;
 
         if(keepCacheSounds[path] != null) keepCacheSounds.remove(path);
         existingBufferData.remove(path);
@@ -137,12 +136,20 @@ class SoundHandler {
     public static function removeFromMemory(snd:Sound, destroyAll:Bool = false) {
         if(destroyAll) {
             final address = snd.cacheAddress;
-            for(snd__ in activeSounds[address].sounds) {
-                snd__.destroy();
-                snd__ = null;
+            var i = 0;
+            for(i in 0...activeSounds[address].sounds.length) {
+                trace(i);
+
+                var sound = activeSounds[address].sounds[i];
+                if(sound == null) {
+                    activeSounds[address].sounds.remove(sound);
+                    continue;
+                }
+                activeSounds[address].sounds[i].destroy();
             }
+            activeSounds[address].sounds = [];
             activeSounds.remove(address);
-            if(existsInCache(address)) removeFromCache(address);
+            if(existsInCache(address)) removeFromCache(address); //Address removal also happens here on its own
 
             cpp.vm.Gc.run(false);
             return;
