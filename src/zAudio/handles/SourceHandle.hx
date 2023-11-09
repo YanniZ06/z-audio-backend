@@ -5,7 +5,7 @@ package zAudio.handles;
  */
 class SourceHandle
 {
-	public var handle:ALSource = null;
+	public var handle:ALSource = 0; // DOCUMENT THIS
 	public var buffer:BufferHandle = null;
 	public var parentSound:Sound = null;
 	public var hasFilter:Bool = false;
@@ -21,7 +21,7 @@ class SourceHandle
 	 * @param id The ID of the auxilary slot to remove
 	 */
 	public function onAuxRemove(id:Int)
-		AL.removeSend(handle, id);
+		HaxeAL.source3i(handle, HaxeEFX.AUXILIARY_SEND_FILTER, HaxeEFX.EFFECTSLOT_NULL, id, /*cast(castedFilter.get(), Int) ??*/ HaxeEFX.FILTER_NULL);
 
 	/**
 	 * Attaches a buffer to this `source`.
@@ -33,7 +33,7 @@ class SourceHandle
 	public function attachBuffer(buffer:BufferHandle) {
 		if(buffer.parentSource != null) buffer.parentSource.detachBuffer();
 
-		AL.sourcei(handle, AL.BUFFER, buffer.handle);
+		HaxeAL.sourcei(handle, HaxeAL.BUFFER, buffer.handle);
 		parentSound.buffer = buffer;
 		this.buffer = buffer;
 		buffer.parentSource = this;
@@ -50,10 +50,10 @@ class SourceHandle
 	 * If no buffer has been connected via `attachBuffer`, this function will most likely fail.
 	 */
 	public function detachBuffer() {
-		if(AL.getSourcei(handle, AL.SOURCE_STATE) != AL.STOPPED) //Gotta make sure we reset everything, cant just check for the sound playing
+		if(HaxeAL.getSourcei(handle, HaxeAL.SOURCE_STATE) != HaxeAL.STOPPED) //Gotta make sure we reset everything, cant just check for the sound playing
 			parentSound.stop();
 		
-		AL.sourcei(handle, AL.BUFFER, null);
+		HaxeAL.sourcei(handle, HaxeAL.BUFFER, null);
 		buffer.parentSource = null;
 		
 		buffer.destroy();
@@ -71,7 +71,7 @@ class SourceHandle
 	 */
 	public function destroy() {
 		if(buffer != null) detachBuffer();
-		AL.deleteSource(handle);
+		HaxeAL.deleteSource(handle);
 		
 		parentSound.source = null;
 		parentSound.initialized = false; //Should be false eitherway but just making sure

@@ -5,7 +5,7 @@ import zAudio.EffectBase.ALEffectType;
 /**
  * The classic reverb effect.
  */
-@:build(zAudio.fx.FXPropertyGenMacro.genFxParams())
+@:build(macros.FXPropertyGenMacro.genFxParams())
 class ReverbFX extends EffectBase {
 	/**
 	 * Controls the coloration of the late reverb. Lowering the value adds more coloration to the late reverb.

@@ -9,11 +9,11 @@ class EffectBase extends FXBase {
 	/**
 	 * Controls whether this Effect should be enabled right now or not.
 	 */
-	public var enabled(default, set):Bool;
+	public var enabled(default, set):Bool = false;
 
 	public var mix(get, set):Float;
 
-	private var effect:ALEffect = null;
+	private var effect:ALEffect = 0;
 	private var aux:AuxSlotHandle = null;
 
 	/**
@@ -28,42 +28,29 @@ class EffectBase extends FXBase {
 	}
 
 	override public function destroy() {
-		//if(aux.appliedSrc != null) aux.removeFromSrc();
+		//if(aux.appliedSrc != 0) aux.removeFromSrc();
 		super.destroy();
 
 		aux.destroy();
 		aux = null;
-		if(effect != null) deleteEffect(effect);
-		effect = null;
+
+		if(effect != 0) HaxeEFX.deleteEffect(effect);
 	}
 
 	public static function makeEffect(type:ALEffectType):ALEffect {
-		var fx = AL.createEffect();
-		AL.effecti(fx, ALEffectTypeParam.EFFECT_TYPE, type);
+		var fx = HaxeEFX.createEffect();
+		HaxeEFX.effecti(fx, ALEffectTypeParam.EFFECT_TYPE, type);
 		
 		return fx;
 	}
 
-	/**
-	 * Deletes the ALEffect `effect`.
-	 * @param effect The effect to delete.
-	 */
-	public static function deleteEffect(effect:ALEffect) {
-		#if (lime_cffi && lime_openal && !macro)
-		LimeAudioCFFI.lime_al_delete_effect(effect);
-		#end
-	}
-
+	//TODO: FIX MYSTERIOUS PARAMETER CHANGING NOT WORKING NO MATTER WHAT
 	function changeParam(param:Dynamic, value:Float) {
-		trace(AL.getErrorString());
-		AL.effectf(effect, 0x0003, value); //why do you suddenly refuse to work??
-		AL.effectf(effect, 0x0003, 0);
-		AL.effectf(effect, 0x0005, 19);
+		//aux.detachEffect();
+		HaxeEFX.effectf(effect, param, value);
+		//aux.reapplyEffect();
+		//aux.removeFromSrc();
 		if(enabled) reapplyEffect();
-		trace(AL.getErrorString());
-		trace(effect);
-		trace(param);
-		trace(value);
 	}
 
 	function set_enabled(val:Bool):Bool {

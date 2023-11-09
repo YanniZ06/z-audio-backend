@@ -4,14 +4,15 @@ import cpp.vm.Gc;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.system.FlxAssets.FlxSoundAsset;
-import flixel.system.FlxSound;
+//import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
-import lime.media.openal.AL;
 import openfl.media.Sound;
 import zAudio.Sound as ZSound;
-import zAudio.SoundHandler;
+
+import zAudio.ZAudioHandler;
+
 import zAudio.SoundLoader;
 import zAudio.handles.BufferHandle;
 
@@ -28,13 +29,15 @@ class PlayState extends FlxState
 		snd2 = new ZSound(soundInfo);
 		snd2.time = 6000;
 		//snd2.play();
-		new FlxTimer().start(6, _ -> SoundHandler.removeFromMemory(snd2));*/
+		new FlxTimer().start(6, _ -> CacheHandler.removeFromMemory(snd2));*/
 
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/michealMp3.mp3"));
 		snd.bandpass.enabled = false;
 		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
 		snd.looping = true;
+		snd.reverb.enabled = true;
+
 		//snd.position.x = 80;
 
 		function loop_low() { //loops bandpass filter weewooo
@@ -48,7 +51,7 @@ class PlayState extends FlxState
 		//snd.time = snd.length - (10000);
 		//snd2.time = snd2.length - 40;
 
-		/*var buffer = new BufferHandle(AL.createBuffer());
+		/*var buffer = new BufferHandle(HaxeAL.createBuffer());
 
 		trace(snd.buffer.reverseData);
 		buffer.fill(snd.buffer.channels, snd.buffer.bitsPerSample, snd.buffer.reverseData, snd.buffer.sampleRate, false);
@@ -58,7 +61,7 @@ class PlayState extends FlxState
 		/*new FlxTimer().start(15, (_) -> {
 			snd.destroy();
 			snd = null;
-			SoundHandler.clear_bufferCache();
+			CacheHandler.clear_bufferCache();
 		});*/
 
 		/*var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/inspected.ogg"));
@@ -75,7 +78,7 @@ class PlayState extends FlxState
 		super.update(elapsed);
 
 		if(FlxG.keys.justPressed.C) {
-			SoundHandler.clear_bufferCache();
+			CacheHandler.clear_bufferCache();
 			trace("CACHE HAS BEEN CLEARED!");
 		}
 		if(FlxG.keys.justPressed.M) {
@@ -85,7 +88,7 @@ class PlayState extends FlxState
 			Gc.compact();
 			gcActive = !gcActive;
 			trace("GC ACTIVE: " + gcActive);
-			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${zAudio.SoundHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${zAudio.SoundHandler.existingBufferData} }');
+			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${zAudio.CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${zAudio.CacheHandler.existingBufferData} }');
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
@@ -119,24 +122,24 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.L) {
 			//snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
 			//snd.reverb.enabled = !snd.reverb.enabled;
-			//trace(SoundHandler.globalVolume);
+			//trace(SoundManager.globalVolume);
 			trace("GC INFO ZSOUND:");
 			trace(Gc.trace(Type.getClass(snd)));
 			trace("\n\nCURRENT FULL MEMORY: " + Gc.memInfo(Gc.MEM_INFO_CURRENT) + "\nRESERVED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_RESERVED) + "\nNEEDED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_USAGE));
 		}
 		if(FlxG.keys.justPressed.B) {
-			//SoundHandler.globalVolume = Math.min(1, SoundHandler.globalVolume + 0.1);
-			snd.reverb.gain = Math.min(1, Math.max(0, snd.reverb.gain + ((0.1 * negMod) * mod)));
-			FlxG.watch.addQuick("Reverbed Gain:", snd.reverb.gain);
+			//SoundManager.globalVolume = Math.min(1, SoundManager.globalVolume + 0.1);
+			snd.reverb.decayTime = Math.min(5, Math.max(0, snd.reverb.decayTime + ((0.1 * negMod) * mod)));
+			FlxG.watch.addQuick("Reverbed DecayTime:", snd.reverb.decayTime);
 		}
 		if(FlxG.keys.justPressed.NUMPADMINUS) {
-			//SoundHandler.globalVolume = Math.max(0, SoundHandler.globalVolume - 0.1);
+			//SoundManager.globalVolume = Math.max(0, SoundManager.globalVolume - 0.1);
 		}
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);
-			SoundHandler.removeFromMemory(snd, true);
+			CacheHandler.removeFromMemory(snd, true);
 			snd = null;
-			//SoundHandler.removeReverseCacheFrom(snd.cacheAddress);
+			//CacheHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");
 		}
 	}

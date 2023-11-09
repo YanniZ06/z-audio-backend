@@ -35,7 +35,7 @@ class HighpassFilter extends FilterBase {
 
     function set_gain(val:Float):Float {
         gain = val;
-        AL.filterf(filter, HighpassParam.HIGHPASS_GAIN, val);
+        HaxeEFX.filterf(filter, HighpassParam.HIGHPASS_GAIN, val);
         if(enabled) reapplyFilter();
 
         return val;
@@ -43,7 +43,7 @@ class HighpassFilter extends FilterBase {
 
     function set_gain_lf(val:Float):Float {
         gain_lf = val;
-        AL.filterf(filter, HighpassParam.HIGHPASS_GAINLF, val);
+        HaxeEFX.filterf(filter, HighpassParam.HIGHPASS_GAINLF, val);
         if(enabled) reapplyFilter();
 
         return val;

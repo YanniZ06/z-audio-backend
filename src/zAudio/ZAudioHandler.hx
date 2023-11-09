@@ -1,22 +1,85 @@
 package zAudio;
 
-import lime.app.Application;
-import lime.ui.Window;
-import lime.media.AudioManager;
-import lime._internal.backend.native.NativeApplication;
-
+#if !macro
 typedef SoundCache = {
     var cacheExists:Bool;
     var hasReverseCache:Bool;
     var sounds:Array<Sound>;
 }
+
 /**
- * Class responsible for global sound handling and memory management.
+ * Class responsible for initializing the HaxeAL and ZAudio backends.
+ * 
+ * Call `preInitialize_AL`, then set your SoundManager options and finally call `initialize_ZAudio` to fully initialize the ZAudio library.
+ */
+class Initializer {
+    /**
+     * The currently active device on the HaxeAL backend.
+     */
+    public static var current_Device:ALDevice = null;
+    
+    /**
+     * The currently active context on the HaxeAL backend.
+     */
+    public static var current_Context:ALContext = null;
+
+    /**
+     * Whether the current application supports the EFX extension or not.
+     */
+    public static var supports_EFX(default, null):Bool = false;
+
+    /**
+     * The max number of effects a singular sound can have at once.
+     */
+    public static var max_sound_efx(default, null):cpp.Int8 = 0;
+
+    // Pre-defines the standard values for all SoundManager Settings.
+    @:noDoc @:noCompletion public static inline var foc_lost_def:Bool = false; //!!!! SET TO TRUE
+
+    /**
+     * Sets up the HaxeAL backend.
+     * 
+     * This function `NEEDS` to be called on Main `BEFORE ANY` other part of the ZAudio backend is modified.
+     */
+    public static function preInitialize_AL() {
+        final deviceName:String = HaxeALC.getString(null, HaxeALC.DEVICE_SPECIFIER);
+		current_Device = HaxeALC.openDevice(deviceName);
+
+        if(current_Device == null) throw 'Failed to initialize HaxeAL-Soft backend!\nNo proper playback device could be created!\n\nAre you sure an audio device is connected?';
+        
+        // Checks if EFX is available and tries to set highest max efx count for sounds if true
+        supports_EFX = HaxeALC.isExtensionPresent("ALC_EXT_EFX");
+        final attributes:Null<Array<Int>> = supports_EFX ? [HaxeEFX.MAX_AUXILIARY_SENDS, 15] : null; 
+        current_Context = HaxeALC.createContext(current_Device, attributes);
+
+        if(current_Context == null) throw 'Failed to initialize HaxeAL-Soft backend!\nNo proper context could be created!\n\nTry restarting the application.';
+
+        HaxeALC.makeContextCurrent(current_Context);
+        max_sound_efx = supports_EFX ? HaxeALC.getIntegers(current_Device, HaxeEFX.MAX_AUXILIARY_SENDS, 1)[0] : 0; // Finally get the actual highest max efx count
+        if(supports_EFX) HaxeEFX.initEFX();
+    }
+
+    /**
+     * Sets up the zAudio backend, should be called on Main `after preInitialize_AL()` has been called
+     * and all SoundManager options have been set to your preferred choice.
+     */
+    public static function initialize_ZAudio() {
+        if(current_Device == null) throw 'The HaxeAL-Soft backend needs to be initialized before the ZAudio backend';
+        HaxeAL.listenerf(HaxeAL.GAIN, SoundManager.globalVolume);
+
+        //Initialize all settings on startup.
+        //We dont trigger the setter twice as these are only triggered if the variable has the same value (which doesnt activate the setter)
+		//if(SoundManager.unfocus_Pauses_Snd == foc_lost_def) change_unfocus_Pauses_Snd();
+    }
+}
+
+/**
+ * Class responsible for global sound and buffer cache handling aswell as memory management.
  * 
  * To easily get the path a Sound or Buffer is stored at (for functions that require them), use the sounds' `cacheAddress` field.
  */
-class SoundHandler {
-    /**
+class CacheHandler {
+   /**
      * Current cache and active sounds mapped to their cache-address (names they were created under).
      * 
      * Sounds are stored in the caches "sounds" array.
@@ -26,48 +89,13 @@ class SoundHandler {
      * Information about existing reverse sound data is defined by "hasReverseCache".
      */
     public static var activeSounds:Map<String, SoundCache> = [];
+
     /**
      * All preloaded Buffers mapped to their assigned files, to avoid duplicates.
      * 
      * Holds no other relevant cache info.
      */
     public static var existingBufferData:Map<String, BufferHandle> = [];
-    /**
-     * If true, audio playback is paused on every unfocused window (or just the main window if you only have one).
-     * 
-     * The playback resumes once the window has been focused.
-     * 
-     * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
-     * to prevent audio desyncing.
-     */
-    private static inline var foc_lost_def:Bool = false; //!!!! SET TO TRUE
-	public static var focusLost_pauseSnd(default, set):Bool = foc_lost_def;
-
-    /**
-     * If true, reverse audio data is preloaded whenever a new sound is loaded in.
-     * Keeping this option on increases first-time audio load times, and doubles the memory each sound uses.
-     */
-    public static var preloadReverseSounds:Bool = false;
-
-    /**
-     * A volume modifier that gets applied to all sounds.
-     * 
-     * Useful for setting master audio volume in your game!
-     */
-    public static var globalVolume(default, set):Float = 1;
-
-    private static var windowEvents:Map<String, Bool> = [];
-
-    /**
-     * Sets up the zAudio backend, should be called on Main `before` starting your game
-	 * and `after` all SoundHandler options have been set to your preferred choice.
-     */
-    public static function init() {
-        AL.listenerf(AL.GAIN, globalVolume);
-        //Initialize all settings on startup.
-        //We dont trigger the setter twice as these are only triggered if the variable has the same value (which doesnt activate the setter)
-		if(focusLost_pauseSnd == foc_lost_def) change_focusLost_pauseSnd();
-    }
 
     /**
      * A map containing all paths to sounds you want to keep cached after a `clear_bufferCache` call.
@@ -79,6 +107,7 @@ class SoundHandler {
      * `removeFromCache` will remove a sound from cache regardless of if its kept in here!
      */
     public static var keepCacheSounds:Map<String, Bool> = [];
+
     /**
      * Simply clears the entire `existingBufferData` cache, with the exception of all paths in `keepCacheSounds`.
      * 
@@ -184,28 +213,54 @@ class SoundHandler {
      * Returns true if a buffer to a sound stored at `path` is found in the buffer-cache, otherwise false.
      */
     public static function existsInCache(path:String):Bool return existingBufferData[path] != null;
+}
 
+class SoundManager {
+    /**
+     * If true, audio playback is paused on every unfocused window (or just the main window if you only have one).
+     * 
+     * The playback resumes once the window has been focused.
+     * 
+     * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
+     * to prevent audio desyncing.
+     */
+	public static var unfocus_Pauses_Snd(default, set):Bool = Initializer.foc_lost_def;
 
-    // -- SETTERS FOR OPTIONS THAT REQUIRE THEM --
+    /**
+     * If true, reverse audio data is preloaded whenever a new sound is loaded in.
+     * Keeping this option on increases first-time audio load times, and doubles the memory each sound uses.
+     */
+    public static var preloadReverseSounds:Bool = false;
+
+    /**
+     * A volume modifier that gets applied to all sounds.
+     * 
+     * Useful for setting master audio volume in your game!
+     */
+    public static var globalVolume(default, set):Float = 1;
+
+    private static var windowEvents:Map<String, Bool> = [];
+
+    // -- SETTERS FOR OPTIONS THAT REQUIRE THEM -- //
     static function set_globalVolume(vol:Float):Float {
         globalVolume = vol;
         //for(cache in activeSounds) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
-        AL.listenerf(AL.GAIN, globalVolume);
+        HaxeAL.listenerf(HaxeAL.GAIN, globalVolume);
         return vol;
     }
-    static function set_focusLost_pauseSnd(val:Bool):Bool {
-		final changed:Bool = focusLost_pauseSnd == val;
+    static function set_unfocus_Pauses_Snd(val:Bool):Bool {
+		final changed:Bool = unfocus_Pauses_Snd == val;
 		if (!changed) return val;
-		focusLost_pauseSnd = val;
+		unfocus_Pauses_Snd = val;
 
-        change_focusLost_pauseSnd();
+        change_unfocus_Pauses_Snd();
         return val;
     }
-    private static function change_focusLost_pauseSnd() {
-        @:privateAccess {
-            switch(focusLost_pauseSnd) {
+    private static function change_unfocus_Pauses_Snd() {
+        /*@:privateAccess {
+            switch(unfocus_Pauses_Snd) {
                 case true:
-					windowEvents.set("focusLost_pauseSnd", true);
+					windowEvents.set("unfocus_Pauses_Snd", true);
                     for (window in Application.current.__windows) {
                         var onUnfocus:Void -> Void = () -> AudioManager.suspend();
                         var onFocus:Void -> Void = () -> AudioManager.resume();
@@ -214,14 +269,15 @@ class SoundHandler {
                         window.onFocusIn.add(onFocus);
                     }
                 case false:
-					if (windowEvents["focusLost_pauseSnd"] == null) return;
-					windowEvents.remove("focusLost_pauseSnd");
+					if (windowEvents["unfocus_Pauses_Snd"] == null) return;
+					windowEvents.remove("unfocus_Pauses_Snd");
 
                     for (window in Application.current.__windows) {
 						window.onFocusOut.remove(() -> AudioManager.suspend());
 						window.onFocusIn.remove(() -> AudioManager.resume());
                     }
             }
-        }
+        }*/
     }
 }
+#end

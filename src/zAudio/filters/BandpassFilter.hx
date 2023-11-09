@@ -41,7 +41,7 @@ class BandpassFilter extends FilterBase {
 
     function set_gain(val:Float):Float {
         gain = val;
-        AL.filterf(filter, BandpassParam.BANDPASS_GAIN, val);
+        HaxeEFX.filterf(filter, BandpassParam.BANDPASS_GAIN, val);
         if(enabled) reapplyFilter();
 
         return val;
@@ -49,7 +49,7 @@ class BandpassFilter extends FilterBase {
 
     function set_gain_lf(val:Float):Float {
         gain_lf = val;
-        AL.filterf(filter, BandpassParam.BANDPASS_GAINLF, val);
+        HaxeEFX.filterf(filter, BandpassParam.BANDPASS_GAINLF, val);
         if(enabled) reapplyFilter();
 
         return val;
@@ -57,7 +57,7 @@ class BandpassFilter extends FilterBase {
 
     function set_gain_hf(val:Float):Float {
         gain_hf = val;
-        AL.filterf(filter, BandpassParam.BANDPASS_GAINHF, val);
+        HaxeEFX.filterf(filter, BandpassParam.BANDPASS_GAINHF, val);
         if(enabled) reapplyFilter();
 
         return val;

@@ -1,17 +1,21 @@
 package;
 
-import lime.media.openal.AL;
-import zAudio.SoundHandler;
 import flixel.FlxGame;
 import openfl.display.Sprite;
+
+import zAudio.ZAudioHandler.Initializer;
+import zAudio.ZAudioHandler.SoundManager;
+
+import haxeal.*;
 
 class Main extends Sprite
 {
 	public function new()
 	{
 		super();
-		SoundHandler.init();
-		trace(AL.getString(AL.VERSION));
+		Initializer.preInitialize_AL();
+		SoundManager.globalVolume = 0.5;
+		Initializer.initialize_ZAudio();
 
 		flixel.FlxG.autoPause = false;
 		addChild(new FlxGame(0, 0, tests.PlayState));

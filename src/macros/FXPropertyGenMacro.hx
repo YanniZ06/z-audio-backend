@@ -1,4 +1,4 @@
-package zAudio.fx;
+package macros;
 
 import haxe.macro.Compiler;
 import haxe.macro.Context;

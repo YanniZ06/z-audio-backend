@@ -10,7 +10,7 @@ class FilterBase extends FXBase {
 	public var enabled(get, set):Bool;
 	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and using unnecessary time to call an AL operation when disabling another filter
 
-	private var filter:ALFilter = null;
+	private var filter:ALFilter = 0;
 
 	/**
      * Loads in an ALFilter of type `type` and attaches it to the `sndRef`.
@@ -29,8 +29,7 @@ class FilterBase extends FXBase {
 		enabled = false;
 		super.destroy();
 
-		if(filter != null) deleteFilter(filter);
-		filter = null;
+		if(filter != 0) HaxeEFX.deleteFilter(filter);
 	}
 
 	function set_enabled(val:Bool):Bool {
@@ -46,7 +45,7 @@ class FilterBase extends FXBase {
 			}
 		}
 		else {
-			AL.removeDirectFilter(sourceRef.handle);
+			removeDirectFilter();
 			@:privateAccess _snd.activeFilter = null;
 		}
 		sourceRef.hasFilter = enabled;
@@ -56,23 +55,14 @@ class FilterBase extends FXBase {
 
 	function get_enabled():Bool return enabled_;
 
-	function reapplyFilter():Void AL.sourcei(sourceRef.handle, AL.DIRECT_FILTER, filter);
+	inline function reapplyFilter():Void HaxeAL.sourcei(sourceRef.handle, HaxeEFX.DIRECT_FILTER, filter);
+	inline function removeDirectFilter():Void HaxeAL.sourcei(sourceRef.handle, HaxeEFX.DIRECT_FILTER, HaxeEFX.FILTER_NULL);
 
 	public static function makeFilter(type:ALFilterType):ALFilter {
-		var fl = AL.createFilter();
-		AL.filteri(fl, ALFilterTypeParam.FILTER_TYPE, type);
+		var fl = HaxeEFX.createFilter();
+		HaxeEFX.filteri(fl, ALFilterTypeParam.FILTER_TYPE, type);
 
 		return fl;
-	}
-
-	/**
-	 * Deletes the ALFilter `filter`.
-	 * @param filter The filter to delete.
-	 */
-	public static function deleteFilter(filter:ALFilter) {
-		#if (lime_cffi && lime_openal && !macro)
-		LimeAudioCFFI.lime_al_delete_filter(filter);
-		#end
 	}
 }
 

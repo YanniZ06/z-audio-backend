@@ -1,19 +1,18 @@
 package zAudio.handles;
 
 import zAudio.EffectBase.ALEffectType;
-import zAudio.FilterBase.AssignedAuxSlot_Filter;
-import zAudio.FilterBase.ALFilterType;
 import zAudio.EffectBase;
-import lime.system.CFFIPointer;
+import zAudio.FilterBase.ALFilterType;
+import zAudio.FilterBase.AssignedAuxSlot_Filter;
 
 // ? https://openal-soft.org/misc-downloads/Effects%20Extension%20Guide.pdf (P. 22 AND 32 etc)
 
 /**
- * A handle for an `ALAuxiliaryEffectSlot`, used to contain effects and filters to apply them to sources using the `applyTo` method.
+ * A handle for an `ALAuxSlot`, used to contain effects and filters to apply them to sources using the `applyTo` method.
  */
 class AuxSlotHandle
 {
-	public var handle:ALAuxiliaryEffectSlot = null;
+	public var handle:ALAuxSlot = 0;
 
 	/**
 	 * The volume for this auxslot, represents how affected the affected ALSource is by the effect or `this` AuxSlotHandle applies.
@@ -23,19 +22,20 @@ class AuxSlotHandle
 	public var auxID(default, null):Int = 0;
 	public var appliedSrc:SourceHandle = null;
 
-	public var appliedFX:ALEffect = null;
+	public var appliedFX:ALEffect = 0;
 
 	public function new(inputFX:ALEffect, type:Int)
 	{
-		var effect:ALEffect;
-
-		appliedFX = effect = cast inputFX;
+		appliedFX = cast inputFX;
 		auxID = getAuxID_FX(type);
 
-		handle = AL.createAux();
-		AL.auxi(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, effect); // Apply effect to the aux
-		AL.auxi(handle, ALAuxSlotParam.EFFECTSLOT_AUXILIARY_SEND_AUTO, AL.FALSE);
+		handle = HaxeEFX.createAuxiliaryEffectSlot();
+		HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, appliedFX); // Apply effect to the aux
+		HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_AUXILIARY_SEND_AUTO, HaxeAL.FALSE);
 	}
+
+	public function detachEffect() HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, HaxeEFX.EFFECTSLOT_NULL);
+	public function reapplyEffect() HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, appliedFX);
 
 	/**
 	 * Applies this AuxSlot to the source `src`, layering its effect/filter over the source output
@@ -44,7 +44,7 @@ class AuxSlotHandle
 	public function applyTo(src:SourceHandle)
 	{
 		//var castedFilter:CFFIPointer = cast appliedFilter;
-		AL.source3i(src.handle, AL.AUXILIARY_SEND_FILTER, handle, auxID, /*cast(castedFilter.get(), Int) ??*/ AL.FILTER_NULL);
+		HaxeAL.source3i(src.handle, HaxeEFX.AUXILIARY_SEND_FILTER, handle, auxID, /*cast(castedFilter.get(), Int) ??*/ HaxeEFX.FILTER_NULL);
 		appliedSrc = src;
 	}
 
@@ -65,20 +65,8 @@ class AuxSlotHandle
 		if (appliedSrc != null)
 			removeFromSrc();
 
-		deleteAuxSlot(handle);
-		handle = null;
-		if(appliedFX != null) EffectBase.deleteEffect(appliedFX);
-		appliedFX = null;
-	}
-
-	/**
-	 * Deletes the ALAuxiliaryEffectSlot `slot`.
-	 * @param slot The ALAuxiliaryEffectSlot to delete.
-	 */
-	public static function deleteAuxSlot(slot:ALAuxiliaryEffectSlot) {
-		#if (lime_cffi && lime_openal && !macro)
-		LimeAudioCFFI.lime_al_delete_auxiliary_effect_slot(slot);
-		#end
+		HaxeEFX.deleteAuxiliaryEffectSlot(handle);
+		if(appliedFX != 0) HaxeEFX.deleteEffect(appliedFX);
 	}
 
 	/**
@@ -106,7 +94,7 @@ class AuxSlotHandle
 
 	function set_volume(vol:Float):Float
 	{
-		AL.auxf(handle, ALAuxSlotParam.EFFECTSLOT_GAIN, vol);
+		HaxeEFX.auxiliaryEffectSlotf(handle, ALAuxSlotParam.EFFECTSLOT_GAIN, vol);
 		volume = vol;
 		return vol;
 	}
@@ -115,7 +103,7 @@ class AuxSlotHandle
 /**
  * An abstract representing all the AL Auxiliary Slot parameters / fields.
  *
- * Used with the AL.auxi function on backend.
+ * Used with the HaxeAL.auxi function on backend.
  */
 enum abstract ALAuxSlotParam(Int) from Int to Int
 {
