@@ -1,7 +1,9 @@
 package zAudio;
 
 // import flixel.system.FlxSound;
-#if !macro
+
+
+//#if !macro
 import haxeal.ALObjects; /*.ALAuxSlot;
 import haxeal.ALObjects.ALDevice;
 import haxeal.ALObjects.ALBuffer;
@@ -12,11 +14,14 @@ import haxeal.ALObjects.ALContext;*/
 
 import haxeal.HaxeAL;
 import haxeal.HaxeALC;
+#if !macro
 import haxeal.HaxeEFX;
+#end
 
 import zAudio.handles.*;
 
 import zAudio.ZAudioHandler; /*.Initializer;
 import zAudio.ZAudioHandler.CacheHandler;
 import zAudio.ZAudioHandler.SoundManager;*/
-#end
+
+//#end

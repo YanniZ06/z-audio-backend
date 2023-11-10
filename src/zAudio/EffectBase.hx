@@ -46,11 +46,12 @@ class EffectBase extends FXBase {
 
 	//TODO: FIX MYSTERIOUS PARAMETER CHANGING NOT WORKING NO MATTER WHAT
 	function changeParam(param:Dynamic, value:Float) {
-		//aux.detachEffect();
 		HaxeEFX.effectf(effect, param, value);
-		//aux.reapplyEffect();
+		aux.detachEffect();
+		aux.reapplyEffect();
+
 		//aux.removeFromSrc();
-		if(enabled) reapplyEffect();
+		//if(enabled) reapplyEffect();
 	}
 
 	function set_enabled(val:Bool):Bool {

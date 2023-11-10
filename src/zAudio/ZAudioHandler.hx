@@ -1,6 +1,5 @@
 package zAudio;
 
-#if !macro
 typedef SoundCache = {
     var cacheExists:Bool;
     var hasReverseCache:Bool;
@@ -69,7 +68,9 @@ class Initializer {
 
         //Initialize all settings on startup.
         //We dont trigger the setter twice as these are only triggered if the variable has the same value (which doesnt activate the setter)
-		//if(SoundManager.unfocus_Pauses_Snd == foc_lost_def) change_unfocus_Pauses_Snd();
+        @:privateAccess {
+            if(SoundManager.unfocus_Pauses_Snd == foc_lost_def) SoundManager.change_unfocus_Pauses_Snd();
+        }
     }
 }
 
@@ -280,4 +281,3 @@ class SoundManager {
         }*/
     }
 }
-#end

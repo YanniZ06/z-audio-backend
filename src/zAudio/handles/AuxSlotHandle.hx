@@ -30,7 +30,7 @@ class AuxSlotHandle
 		auxID = getAuxID_FX(type);
 
 		handle = HaxeEFX.createAuxiliaryEffectSlot();
-		HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_EFFECT, appliedFX); // Apply effect to the aux
+		reapplyEffect(); // Apply effect to the aux
 		HaxeEFX.auxiliaryEffectSloti(handle, ALAuxSlotParam.EFFECTSLOT_AUXILIARY_SEND_AUTO, HaxeAL.FALSE);
 	}
 
