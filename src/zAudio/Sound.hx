@@ -148,9 +148,10 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
-        loadFX(this);
+        if(Initializer.supports_EFX) loadFX(this);
 
         CacheHandler.activeSounds[cacheAddress].sounds.push(this);
+
         finishTimer = new Timer(500); //Avoid a null ref when destroying sound that hasnt been played once (whyever you'd do that)
         finishTimer.stop();
     }

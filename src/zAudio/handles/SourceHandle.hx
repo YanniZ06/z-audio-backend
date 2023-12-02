@@ -17,8 +17,8 @@ class SourceHandle
 	}
 
 	/**
-	 * Effect Utility Function to get rid of an Auxilary Effect Slot connected to the source
-	 * @param id The ID of the auxilary slot to remove
+	 * Effect Utility Function to get rid of an Auxiliary Effect Slot connected to the source
+	 * @param id The ID of the auxiliary slot to remove
 	 */
 	public function onAuxRemove(id:Int)
 		HaxeAL.source3i(handle, HaxeEFX.AUXILIARY_SEND_FILTER, HaxeEFX.EFFECTSLOT_NULL, id, /*cast(castedFilter.get(), Int) ??*/ HaxeEFX.FILTER_NULL);

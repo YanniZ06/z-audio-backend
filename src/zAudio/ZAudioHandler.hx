@@ -41,21 +41,25 @@ class Initializer {
      * This function `NEEDS` to be called on Main `BEFORE ANY` other part of the ZAudio backend is modified.
      */
     public static function preInitialize_AL() {
+        //! IMPORTANT, OPENAL SOFT DRIVERS MUST BE INSTALLED FOR THIS TO WORK AS IT SHOULD!!!!!!
         final deviceName:String = HaxeALC.getString(null, HaxeALC.DEVICE_SPECIFIER);
 		current_Device = HaxeALC.openDevice(deviceName);
 
         if(current_Device == null) throw 'Failed to initialize HaxeAL-Soft backend!\nNo proper playback device could be created!\n\nAre you sure an audio device is connected?';
         
         // Checks if EFX is available and tries to set highest max efx count for sounds if true
-        supports_EFX = HaxeALC.isExtensionPresent("ALC_EXT_EFX");
-        final attributes:Null<Array<Int>> = supports_EFX ? [HaxeEFX.MAX_AUXILIARY_SENDS, 15] : null; 
+        supports_EFX = HaxeALC.isExtensionPresent(current_Device, 'ALC_EXT_EFX');
+        final attributes:Null<Array<Int>> = supports_EFX ? [HaxeEFX.MAX_AUXILIARY_SENDS, 6] : null; 
         current_Context = HaxeALC.createContext(current_Device, attributes);
 
         if(current_Context == null) throw 'Failed to initialize HaxeAL-Soft backend!\nNo proper context could be created!\n\nTry restarting the application.';
 
         HaxeALC.makeContextCurrent(current_Context);
         max_sound_efx = supports_EFX ? HaxeALC.getIntegers(current_Device, HaxeEFX.MAX_AUXILIARY_SENDS, 1)[0] : 0; // Finally get the actual highest max efx count
-        if(supports_EFX) HaxeEFX.initEFX();
+        if(supports_EFX) { 
+            HaxeEFX.initEFX();
+            trace('EFX Support is on!\nMax Auxiliary Sends per Sound: $max_sound_efx');
+        }
     }
 
     /**
@@ -218,14 +222,34 @@ class CacheHandler {
 
 class SoundManager {
     /**
-     * If true, audio playback is paused on every unfocused window (or just the main window if you only have one).
+     * If true, audio playback is paused on every unfocused window.
      * 
      * The playback resumes once the window has been focused.
      * 
      * It is highly recommended this is set to true if the rest of your application also pauses when a window is unfocused
      * to prevent audio desyncing.
+     * 
+     * 
+     * (Only relevant if used outside of a premade game engine integrating ZAudio):
+     * 
+     * This variable works as soon as `onUnfocus__PauseSnd` has been
+     * bound to the application windows' unfocus callback and `onFocus__PauseSnd` has been set to the windows' focus callback.
      */
 	public static var unfocus_Pauses_Snd(default, set):Bool = Initializer.foc_lost_def;
+
+    /**
+     * Function that is executed to pause sound when the windows focus is lost.
+     * 
+     * See `unfocus_Pauses_Snd` variable for further reference.
+     */
+    public static var onUnfocus__PauseSnd(default, null):Void -> Void = () -> {};
+
+    /**
+     * Function that is executed to unpause sound when the windows focus is gained.
+     * 
+     * See `unfocus_Pauses_Snd` variable for further reference.
+     */
+    public static var onFocus__PauseSnd(default, null):Void -> Void = () -> {};
 
     /**
      * If true, reverse audio data is preloaded whenever a new sound is loaded in.
@@ -257,7 +281,16 @@ class SoundManager {
         change_unfocus_Pauses_Snd();
         return val;
     }
+
     private static function change_unfocus_Pauses_Snd() {
+        if(unfocus_Pauses_Snd) {
+            onUnfocus__PauseSnd = () -> HaxeALC.suspendContext(Initializer.current_Context);
+            onFocus__PauseSnd = () -> HaxeALC.processContext(Initializer.current_Context);
+            return;
+        }
+        onUnfocus__PauseSnd = () -> {};
+        onFocus__PauseSnd = () -> {};
+        HaxeALC.processContext(Initializer.current_Context);
         /*@:privateAccess {
             switch(unfocus_Pauses_Snd) {
                 case true:

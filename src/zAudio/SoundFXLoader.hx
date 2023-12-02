@@ -35,7 +35,6 @@ class SoundFXLoader {
     public function loadFX(sndParent:Sound) {
         reverb = new ReverbFX(sndParent);
 
-
         lowpass = new LowpassFilter(sndParent);
         highpass = new HighpassFilter(sndParent);
         bandpass = new BandpassFilter(sndParent);

@@ -44,14 +44,10 @@ class EffectBase extends FXBase {
 		return fx;
 	}
 
-	//TODO: FIX MYSTERIOUS PARAMETER CHANGING NOT WORKING NO MATTER WHAT
+	// Internally changes the effect parameter. Automatically handled by setters generated from property-gen-macro
 	function changeParam(param:Dynamic, value:Float) {
 		HaxeEFX.effectf(effect, param, value);
-		aux.detachEffect();
 		aux.reapplyEffect();
-
-		//aux.removeFromSrc();
-		//if(enabled) reapplyEffect();
 	}
 
 	function set_enabled(val:Bool):Bool {
@@ -65,7 +61,7 @@ class EffectBase extends FXBase {
 		return val;
 	}
 
-	function reapplyEffect():Void { aux.applyTo(sourceRef); trace("reapplied!"); }
+	function reapplyEffect():Void { aux.applyTo(sourceRef); }
 
 	function get_mix():Float return aux.volume;
 	function set_mix(val:Float):Float { aux.volume = val; return val; }
