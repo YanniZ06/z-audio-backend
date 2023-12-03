@@ -6,9 +6,11 @@ package zAudio;
 class FilterBase extends FXBase {
 	/**
 	 * Controls whether this Filter should be enabled right now or not.
+	 * 
+	 * False by default.
 	 */
 	public var enabled(get, set):Bool;
-	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and using unnecessary time to call an AL operation when disabling another filter
+	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and using unnecessary time to call an AL operation when instantly replacing another filter	
 
 	private var filter:ALFilter = 0;
 
@@ -40,6 +42,7 @@ class FilterBase extends FXBase {
 		if(enabled_) { 
 			reapplyFilter();
 			@:privateAccess {
+				// Internally marks the old filter as disabled without calling the setter, spares us a little bit of performance
 				if(_snd.activeFilter != null) _snd.activeFilter.enabled_ = false;
 				_snd.activeFilter = this;
 			}

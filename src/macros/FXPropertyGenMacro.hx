@@ -1,6 +1,6 @@
 package macros;
 
-//import haxe.macro.Tools.TExprTools;
+import haxe.macro.Tools.TExprTools;
 import haxe.macro.Compiler;
 import haxe.macro.Context;
 import haxe.macro.Expr;
@@ -53,7 +53,7 @@ class FXPropertyGenMacro {
 				// ^^^^ this fucking thing took me months to fix i hate it so much
 
 				$i{field.name} = val;
-                $i{'changeParam'}(id, val); //Very trippy
+                $i{'changeParam_$type'}(id, val); // Create a call to our property types' changeParam function
 				return val;
 			};
 
@@ -70,7 +70,7 @@ class FXPropertyGenMacro {
 				default:
 			}
 			
-			//trace(TExprTools.toString(func)); // Debugging 
+			trace(TExprTools.toString(func)); // Debugging 
 
             var setAccess = field.access.copy();
             if(setAccess != null) setAccess.remove(APublic); //Avoid it showing up on vsCode completion

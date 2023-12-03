@@ -44,8 +44,14 @@ class EffectBase extends FXBase {
 		return fx;
 	}
 
-	// Internally changes the effect parameter. Automatically handled by setters generated from property-gen-macro
-	function changeParam(param:Dynamic, value:Float) {
+	// Internally changes an int effect parameter. Automatically handled by setters generated from property-gen-macro
+	function changeParam_Int(param:Dynamic, value:Int) {
+		HaxeEFX.effecti(effect, param, value);
+		aux.reapplyEffect();
+	}
+
+	// Internally changes a float effect parameter. Automatically handled by setters generated from property-gen-macro
+	function changeParam_Float(param:Dynamic, value:Float) {
 		HaxeEFX.effectf(effect, param, value);
 		aux.reapplyEffect();
 	}
@@ -145,13 +151,7 @@ enum abstract AssignedAuxSlot_Effect(Int) from Int to Int {
 	public static inline var EAXREVERB_LFREFERENCE:ALEffectParam = 0x0015;
 	public static inline var EAXREVERB_ROOM_ROLLOFF_FACTOR:ALEffectParam = 0x0016;
 	public static inline var EAXREVERB_DECAY_HFLIMIT:ALEffectParam = 0x0017;
-	/* Chorus effect parameters */
-	public static inline var CHORUS_WAVEFORM:ALEffectParam = 0x0001;
-	public static inline var CHORUS_PHASE:ALEffectParam = 0x0002;
-	public static inline var CHORUS_RATE:ALEffectParam = 0x0003;
-	public static inline var CHORUS_DEPTH:ALEffectParam = 0x0004;
-	public static inline var CHORUS_FEEDBACK:ALEffectParam = 0x0005;
-	public static inline var CHORUS_DELAY:ALEffectParam = 0x0006;
+
 	/* Distortion effect parameters */
 	public static inline var DISTORTION_EDGE:ALEffectParam = 0x0001;
 	public static inline var DISTORTION_GAIN:ALEffectParam = 0x0002;

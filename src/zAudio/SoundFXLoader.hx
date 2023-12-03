@@ -10,7 +10,19 @@ import zAudio.fx.*;
  */
 class SoundFXLoader {
     //EFFECTS
+    /**
+     * The reverb on this sound.
+     * 
+     * Check `ReverbFX` for more precise documentation
+     */
     public var reverb:ReverbFX;
+    /**
+     * The chorus on this sound.
+     * 
+     * Check `ChorusFX` for more precise documentation
+     */
+    public var chorus:ChorusFX;
+
     //FILTERS
     /**
      * The lowpass on this sound.
@@ -34,6 +46,7 @@ class SoundFXLoader {
 
     public function loadFX(sndParent:Sound) {
         reverb = new ReverbFX(sndParent);
+        chorus = new ChorusFX(sndParent);
 
         lowpass = new LowpassFilter(sndParent);
         highpass = new HighpassFilter(sndParent);
