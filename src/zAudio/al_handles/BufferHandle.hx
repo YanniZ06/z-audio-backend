@@ -1,4 +1,4 @@
-package zAudio.handles;
+package zAudio.al_handles;
 
 import haxe.io.Bytes;
 import haxe.io.Int32Array;

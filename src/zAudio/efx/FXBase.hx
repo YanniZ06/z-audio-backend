@@ -1,4 +1,4 @@
-package zAudio;
+package zAudio.efx;
 
 /**
  * The (currently barebones) base for all sound effect & filter modifiers.

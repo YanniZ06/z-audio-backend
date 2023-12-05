@@ -1,12 +1,10 @@
 package;
 
 import flixel.FlxGame;
-import openfl.display.Sprite;
-
-import zAudio.ZAudioHandler.Initializer;
-import zAudio.ZAudioHandler.SoundManager;
-
 import haxeal.*;
+import openfl.display.Sprite;
+import zAudio.manager.Initializer;
+import zAudio.manager.SoundSettings;
 
 class Main extends Sprite
 {
@@ -14,7 +12,7 @@ class Main extends Sprite
 	{
 		super();
 		Initializer.preInitialize_AL();
-		SoundManager.globalVolume = 0.5;
+		SoundSettings.globalVolume = 0.5;
 		Initializer.initialize_ZAudio();
 
 		flixel.FlxG.autoPause = false;

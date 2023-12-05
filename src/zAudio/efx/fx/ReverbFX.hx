@@ -1,6 +1,6 @@
-package zAudio.fx;
+package zAudio.efx.fx;
 
-import zAudio.EffectBase.ALEffectType;
+import zAudio.efx.EffectBase.ALEffectType;
 
 /**
  * An Effect representing a standard reverb.

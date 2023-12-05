@@ -1,9 +1,9 @@
-package zAudio.handles;
+package zAudio.al_handles;
 
-import zAudio.EffectBase.ALEffectType;
-import zAudio.EffectBase;
-import zAudio.FilterBase.ALFilterType;
-import zAudio.FilterBase.AssignedAuxSlot_Filter;
+import zAudio.efx.EffectBase.ALEffectType;
+import zAudio.efx.EffectBase;
+import zAudio.efx.FilterBase.ALFilterType;
+import zAudio.efx.FilterBase.AssignedAuxSlot_Filter;
 
 // ? https://openal-soft.org/misc-downloads/Effects%20Extension%20Guide.pdf (P. 22 AND 32 etc)
 

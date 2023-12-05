@@ -70,7 +70,7 @@ class FXPropertyGenMacro {
 				default:
 			}
 			
-			trace(TExprTools.toString(func)); // Debugging 
+			//trace(TExprTools.toString(func)); // Debugging 
 
             var setAccess = field.access.copy();
             if(setAccess != null) setAccess.remove(APublic); //Avoid it showing up on vsCode completion

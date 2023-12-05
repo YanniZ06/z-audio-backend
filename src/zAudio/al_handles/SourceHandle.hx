@@ -1,7 +1,7 @@
-package zAudio.handles;
+package zAudio.al_handles;
 
 /**
- * A handle for an `ALSource` object, handles aux and filter related properties for the `handle` ALSource type object.
+ * A handle for an `ALSource` object, al_handles aux and filter related properties for the `handle` ALSource type object.
  */
 class SourceHandle
 {

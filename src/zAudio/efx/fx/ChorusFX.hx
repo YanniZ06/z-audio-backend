@@ -1,6 +1,6 @@
-package zAudio.fx;
+package zAudio.efx.fx;
 
-import zAudio.EffectBase.ALEffectType;
+import zAudio.efx.EffectBase.ALEffectType;
 
 /**
  * An Effect representing a chorus by playing back delayed doubled versions of the input audio.
@@ -20,7 +20,7 @@ class ChorusFX extends EffectBase {
      * 
      * Only accepts ChorusWaveform Values.
      */
-    @fxParam(0x0001) public var waveform:ChorusWaveform = ChorusWaveform.triangle;
+    @fxParam(0x0001) public var waveform:Int = ChorusWaveform.triangle;
 
     /**
      * Controls the phase difference between the left and right LFO’s. 

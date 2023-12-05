@@ -1,6 +1,6 @@
-package zAudio.filters;
+package zAudio.efx.filters;
 
-import zAudio.FilterBase.ALFilterType;
+import zAudio.efx.FilterBase.ALFilterType;
 
 /**
  * A filter representing a lowpass (or shelf).

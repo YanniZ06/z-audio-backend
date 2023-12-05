@@ -4,17 +4,15 @@ import cpp.vm.Gc;
 import flixel.FlxG;
 import flixel.FlxState;
 import flixel.system.FlxAssets.FlxSoundAsset;
-//import flixel.system.FlxSound;
+// import flixel.system.FlxSound;
 import flixel.system.ui.FlxSoundTray;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import openfl.media.Sound;
 import zAudio.Sound as ZSound;
-
-import zAudio.ZAudioHandler;
-
 import zAudio.SoundLoader;
-import zAudio.handles.BufferHandle;
+import zAudio.al_handles.BufferHandle;
+import zAudio.manager.*;
 
 class PlayState extends FlxState
 {
@@ -88,7 +86,7 @@ class PlayState extends FlxState
 			Gc.compact();
 			gcActive = !gcActive;
 			trace("GC ACTIVE: " + gcActive);
-			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${zAudio.CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${zAudio.CacheHandler.existingBufferData} }');
+			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${CacheHandler.existingBufferData} }');
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
@@ -122,18 +120,18 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.L) {
 			//snd.lowpass.gain_hf = Math.min(1, Math.max(0, snd.lowpass.gain_hf + ((0.033 * negMod) * mod)));
 			//snd.reverb.enabled = !snd.reverb.enabled;
-			//trace(SoundManager.globalVolume);
+			//trace(SoundSettings.globalVolume);
 			trace("GC INFO ZSOUND:");
 			trace(Gc.trace(Type.getClass(snd)));
 			trace("\n\nCURRENT FULL MEMORY: " + Gc.memInfo(Gc.MEM_INFO_CURRENT) + "\nRESERVED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_RESERVED) + "\nNEEDED MEMORY: " + Gc.memInfo(Gc.MEM_INFO_USAGE));
 		}
 		if(FlxG.keys.justPressed.B) {
-			//SoundManager.globalVolume = Math.min(1, SoundManager.globalVolume + 0.1);
+			//SoundSettings.globalVolume = Math.min(1, SoundSettings.globalVolume + 0.1);
 			snd.reverb.decayTime = Math.min(5, Math.max(0, snd.reverb.decayTime + ((0.1 * negMod) * mod)));
 			FlxG.watch.addQuick("Reverbed DecayTime:", snd.reverb.decayTime);
 		}
 		if(FlxG.keys.justPressed.NUMPADMINUS) {
-			//SoundManager.globalVolume = Math.max(0, SoundManager.globalVolume - 0.1);
+			//SoundSettings.globalVolume = Math.max(0, SoundSettings.globalVolume - 0.1);
 		}
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);

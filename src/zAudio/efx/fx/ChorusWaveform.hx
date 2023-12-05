@@ -1,4 +1,4 @@
-package zAudio.fx;
+package zAudio.efx.fx;
 
 /**
  * Represents the Chorus Waveform Types.

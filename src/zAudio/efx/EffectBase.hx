@@ -1,48 +1,88 @@
-package zAudio;
+package zAudio.efx;
 
-import zAudio.fx.ReverbFX;
+import zAudio.efx.fx.ReverbFX;
 
 /**
  * The base for all sound effect modifiers.
  */
 class EffectBase extends FXBase {	
 	/**
-	 * Controls whether this Effect should be enabled right now or not.
+	 * Controls whether this effect should be enabled right now or not.
+	 * 
+	 * False by default.
 	 */
-	public var enabled(default, set):Bool = false;
+	public var enabled(get, set):Bool;
+	@:noCompletion private var enabled_:Bool = false; //To prevent calling the setter and re-removing an effect when theres too many active at once
 
+	/**
+	 * Shows whether this effect is loaded up (useable) or not (unuseable).
+	 * 
+	 * Call `load` and `unload` to influence this value.
+	 */
+	public var loaded(default, null):Bool = false;
+
+	/**
+	 * How much this effect should be applied to the sound.
+	 */
 	public var mix(get, set):Float;
 
+
 	private var effect:ALEffect = 0;
+	private var type:Int = ALEffectType.EFFECT_NULL;
 	private var aux:AuxSlotHandle = null;
 
 	/**
-     * Loads in an ALFilter of type `type` and attaches it to the `sndRef`.
-     * @param sndRef The sound to attach the filter to.
-	 * @param type The type of ALFilter you want to attach to the sound.
+     * Loads in an ALEffect of type `type` and attaches it to the `sndRef`.
+     * @param sndRef The sound to attach the effect to.
+	 * @param type The type of ALEffect you want to attach to the sound.
      */
-	private function new(sndRef:Sound, type:ALEffectType) {
+	public function new(sndRef:Sound, type:ALEffectType) {
 		super(sndRef);
-		effect = makeEffect(type);
-		aux = new AuxSlotHandle(effect, type);
+		this.type = type;
+		if(SoundSettings.autoLoadFX) load();
 	}
 
-	override public function destroy() {
-		//if(aux.appliedSrc != 0) aux.removeFromSrc();
-		super.destroy();
+	/**
+	 * Loads this effect up and makes it useable.
+	 * 
+	 * Should not be used if loaded has the value true.
+	 */
+	public function load() {
+		effect = makeEffect(type);
+		aux = new AuxSlotHandle(effect, type);
+
+		_snd.loadedEffects.push(this);
+		loaded = true;
+	}
+
+	/**
+	 * Unloads this effect up and renders it unuseable, freeing memory.
+	 * 
+	 * Should not be used if loaded has the value false.
+	 */
+	public function unload() {
+		_snd.loadedEffects.remove(this);
+		loaded = false;
 
 		aux.destroy();
 		aux = null;
-
 		if(effect != 0) HaxeEFX.deleteEffect(effect);
 	}
 
-	public static function makeEffect(type:ALEffectType):ALEffect {
+	override public function destroy() {
+		if(loaded) unload();
+		
+		super.destroy();
+	}
+
+
+	public static inline function makeEffect(type:ALEffectType):ALEffect {
 		var fx = HaxeEFX.createEffect();
 		HaxeEFX.effecti(fx, ALEffectTypeParam.EFFECT_TYPE, type);
 		
 		return fx;
 	}
+
 
 	// Internally changes an int effect parameter. Automatically handled by setters generated from property-gen-macro
 	function changeParam_Int(param:Dynamic, value:Int) {
@@ -56,18 +96,32 @@ class EffectBase extends FXBase {
 		aux.reapplyEffect();
 	}
 
-	function set_enabled(val:Bool):Bool {
-		final oldE = enabled;
-		enabled = val;
-		if(oldE == enabled) return val;
+	inline function onSrcBind() {
+		if(_snd.enabledEffects.push(this) <= Initializer.max_sound_efx) return;
+		
+		@:privateAccess {
+			var fx = _snd.enabledEffects.shift();
+			fx.aux.removeFromSrc();
+			fx.enabled_ = false; // We don't wanna call the setter here again we already know our values
+		}
+	}
 
-		if(enabled) reapplyEffect();
-		else aux.removeFromSrc();
+	inline function rebindAux():Void { aux.applyTo(sourceRef); }
+
+	function get_enabled():Bool return enabled_;
+	function set_enabled(val:Bool):Bool {
+		final oldE = enabled_;
+		enabled_ = val;
+		if(oldE == enabled_) return val;
+
+		if(enabled_) { onSrcBind(); rebindAux(); }
+		else { 
+			aux.removeFromSrc(); 
+			_snd.enabledEffects.remove(this); 
+		}
 
 		return val;
 	}
-
-	function reapplyEffect():Void { aux.applyTo(sourceRef); }
 
 	function get_mix():Float return aux.volume;
 	function set_mix(val:Float):Float { aux.volume = val; return val; }

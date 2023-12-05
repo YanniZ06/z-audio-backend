@@ -4,12 +4,8 @@ package zAudio;
 import haxe.Timer;
 import haxe.http.HttpBase;
 import haxe.io.Bytes;
-import lime.media.AudioBuffer;
-import lime.utils.ArrayBufferView;
-import lime.utils.Int8Array;
-import lime.utils.UInt8Array;
 import sys.io.File;
-import zAudio.handles.BufferHandle;
+import zAudio.al_handles.BufferHandle;
 
 class SoundLoader
 {
@@ -20,7 +16,7 @@ class SoundLoader
 	 * @param url The URL to load the sound from, must be of type wav or ogg.
 	 * @param preloadReverseData If true, preloads reverse sound data for the sound (unless its already been preloaded).
 	 * Check out your sounds' `buffer.preloadReverseData()` field for a way to preload the reverse data later.
-	 * This parameter is optional and defaults to the `preloadReverseSounds` value from `SoundManager`.
+	 * This parameter is optional and defaults to the `preloadReverseSounds` value from `SoundSettings`.
 	 */
 	public static function fromURL(url:String, ?preloadReverseData:Bool = null):BufferHandle
 	{
@@ -28,7 +24,7 @@ class SoundLoader
 		if(cached != null) return cached;
 
 		var req = new haxe.http.HttpBase(url);
-		final pr = preloadReverseData ?? SoundManager.preloadReverseSounds;
+		final pr = preloadReverseData ?? SoundSettings.preloadReverseSounds;
 
 		var retBuffer:BufferHandle = null;
 		req.onBytes = bytes -> retBuffer = bufferFromBytes(bytes, url, pr);
@@ -45,7 +41,7 @@ class SoundLoader
 	 * @param path Path to the sound you wanna load, must be wav or ogg.
 	 * @param preloadReverseData If true, preloads reverse sound data for the sound (unless its already been preloaded).
 	 * Check out your sounds' `buffer.preloadReverseData()` field for a way to preload the reverse data later.
-	 * This parameter is optional and defaults to the `preloadReverseSounds` value from `SoundManager`.
+	 * This parameter is optional and defaults to the `preloadReverseSounds` value from `SoundSettings`.
 	 * @return A Buffer that stores the sound information.
 	 */
 	public static function fromFile(path:String, ?preloadReverseData:Bool = null):BufferHandle
@@ -53,7 +49,7 @@ class SoundLoader
 		var cached = checkCache(path);
 		if(cached != null) return cached;
 
-		final pr = preloadReverseData ?? SoundManager.preloadReverseSounds;
+		final pr = preloadReverseData ?? SoundSettings.preloadReverseSounds;
 		final fileBytes = File.getBytes(path);
 		return bufferFromBytes(fileBytes, path, pr);
 	}
@@ -162,7 +158,7 @@ class SoundLoader
 
 	//Must i repeat myself
 	private static function mp3Load(bytes:Bytes, filePath:String, preloadReverse:Bool) {
-		var mp3Info = MiniMP3.decodeMP3(bytes);
+		var mp3Info = zAudio.decoders.MP3Decoder.decodeMP3(bytes);
 		
 		CacheHandler.existingBufferData.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(mp3Info.channels, 16, mp3Info.data, mp3Info.sampleRate, preloadReverse));
 		CacheHandler.existingBufferData[filePath].onCleanup = () -> { cpp.Native.free(cpp.NativeArray.address(mp3Info.data.getData(), 0).ptr); };

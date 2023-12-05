@@ -19,7 +19,7 @@ import haxe.Timer;
  * 
  * To find out more about filter and effect properties, visit the `API Documentation`.
  */
-class Sound extends SoundFXLoader implements SoundBaseI{
+class Sound extends Sound_FxBackend implements SoundBaseI {
     var finishTimer:Timer;
     /**
      * Handle for the connected ALSource and its various properties.
@@ -127,8 +127,10 @@ class Sound extends SoundFXLoader implements SoundBaseI{
     /**
      * Loads in a new Sound object from the filled input buffer and returns it.
      * @param inputBuffer The `BufferHandle` object to load into the sound. Create one using one of the `zAudio.SoundLoader` functions.
+     * @param initializeEFX If true, initializes all sound EFX. It can be smart to set this to false for sounds that only play shortly and never need effects.
+     * If `SoundSettings.autoLoadFX` is false, you need to load in the effects you want to use yourself after initialization is done!! (See `Sound_FxBackend`)
      */
-    public function new(inputBuffer:BufferHandle) {
+    public function new(inputBuffer:BufferHandle, initializeEFX:Bool = true) {
 		//id = Pointer.addressOf(this);
         source = new SourceHandle(HaxeAL.createSource(), this);
 		source.attachBuffer(inputBuffer);
@@ -148,7 +150,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         byteOffsetSetter = setByteOffset_Paused;
 
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
-        if(Initializer.supports_EFX) loadFX(this);
+        if(initializeEFX) init_EFX(this);
 
         CacheHandler.activeSounds[cacheAddress].sounds.push(this);
 
@@ -243,6 +245,33 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         paused = true;
     }
 
+    /**
+	 * Destroys this Sound and renders it unuseable.
+	 * Memory will be cleared the next time the garbage collector is activated.
+	 */
+    public function destroy() {
+        var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
+        curAddressPtr.sounds.remove(this);
+        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) CacheHandler.activeSounds.remove(cacheAddress);
+        cacheAddress = null;
+        curAddressPtr = null;
+
+        if(efx_init) cleanup_EFX(); //Get rid of / unload all fx -> if available
+
+        buffer.destroy();
+        source.destroy();
+        if(finishTimer != null) {
+            finishTimer.stop();
+            finishTimer = null;
+        }
+        //id = null;
+		buffer = null;
+		source = null;
+        timeGetter = null;
+        timeSetter = null;
+        onFinish = null;
+    }
+
     function switchPlaying() {
         byteOffsetGetter = !playing ? getByteOffset_Paused : getByteOffset_Playing;
         byteOffsetSetter = !playing ? setByteOffset_Paused : setByteOffset_Playing;
@@ -275,11 +304,14 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         setByteOffset_Paused(1);
     }
 
+    // Looping
     function get_looping():Bool return HaxeAL.getSourcei(source.handle, HaxeAL.LOOPING) == HaxeAL.TRUE ? true : false;
     function set_looping(val:Bool):Bool {
         HaxeAL.sourcei(source.handle, HaxeAL.LOOPING, val ? HaxeAL.TRUE : HaxeAL.FALSE);
         return val;
     }
+
+    // Pitch
     function get_pitch():Float return HaxeAL.getSourcef(source.handle, HaxeAL.PITCH);
     function set_pitch(val:Float):Float {
         HaxeAL.sourcef(source.handle, HaxeAL.PITCH, val);
@@ -288,10 +320,12 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         setTimer(timeRemaining);
         return val;
     }
+
+    // Volume
     //function get_volume():Float return actualVolume;
     function set_volume(val:Float):Float {
         /*actualVolume*/ volume = val;
-        HaxeAL.sourcef(source.handle, HaxeAL.GAIN, val); //* SoundManager.globalVolume);
+        HaxeAL.sourcef(source.handle, HaxeAL.GAIN, val); //* SoundSettings.globalVolume);
         return val;
     }
 
@@ -301,6 +335,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         return val;
     }
 
+    // Reversal
     var regularWasFinished:Bool = false;
     function set_reversed(b:Bool):Bool {
         final oldR = reversed;
@@ -336,9 +371,11 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         
         playing = wasPlaying;
 
+        // Setter
         byteOffsetSetter = playing ? setByteOffset_Playing : setByteOffset_Paused;
         time = oldTime;
 
+        // Getter (why are we doing this after setting the time?)
         byteOffsetGetter = playing ? getByteOffset_Playing : getByteOffset_Paused;
 
         return b;
@@ -361,7 +398,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         onFinish();
 
     function finishRegular() {
-        var timeRemaining = Std.int((length - time) / pitch); //THIS ENSURES SOUND DOESNT STOP WHEN THE APP AUTOPAUSES
+        var timeRemaining = Std.int((length - time) / pitch); // THIS ENSURES SOUND DOESNT STOP WHEN THE APP AUTOPAUSES
 		if(timeRemaining > 100 && HaxeAL.getSourcei(source.handle, HaxeAL.SOURCE_STATE) == HaxeAL.PLAYING)
 		{
 			setTimer(timeRemaining);
@@ -380,9 +417,9 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         time = 0;
     }
 
-    //Name is kind of a lie, this just prevents regular finishing and stops the soun, seperate function incase we need to adjust things
+    //Name is kind of a lie, this just prevents regular finishing and stops the sound, seperate function incase we need to adjust things
     function finishReverse() {
-        var timeRemaining = Std.int(time / pitch); //THIS ENSURES IT DOESNT STOP WHEN THE APP AUTOPAUSES
+        var timeRemaining = Std.int(time / pitch); // THIS ENSURES IT DOESNT STOP WHEN THE APP AUTOPAUSES
 		if(timeRemaining > 100 && HaxeAL.getSourcei(source.handle, HaxeAL.SOURCE_STATE) == HaxeAL.PLAYING)
 		{
 			setTimer(timeRemaining);
@@ -394,6 +431,7 @@ class Sound extends SoundFXLoader implements SoundBaseI{
         allowPlay = false; //Avoid reverse audio glitch :)
     }
 
+    // Time
     var timeGetter:Void -> Float;
     function get_time():Float
         return timeGetter();
@@ -479,32 +517,5 @@ class Sound extends SoundFXLoader implements SoundBaseI{
             var timeRemaining = Std.int((val_) / pitch);
             setTimer(timeRemaining);
         }
-    }
-
-    /**
-	 * Destroys this Sound and renders it unuseable.
-	 * Memory will be cleared the next time the garbage collector is activated.
-	 */
-    override public function destroy() {
-        var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
-        curAddressPtr.sounds.remove(this);
-        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) CacheHandler.activeSounds.remove(cacheAddress);
-        cacheAddress = null;
-        curAddressPtr = null;
-
-        super.destroy(); //Get rid of / unload all fx
-
-        buffer.destroy();
-        source.destroy();
-        if(finishTimer != null) {
-            finishTimer.stop();
-            finishTimer = null;
-        }
-        //id = null;
-		buffer = null;
-		source = null;
-        timeGetter = null;
-        timeSetter = null;
-        onFinish = null;
     }
 }
