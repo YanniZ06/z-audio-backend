@@ -23,11 +23,11 @@ This library isn't finished yet, so here's seperate progress reports and current
 - WAV and MP3 can be decoded
 - OGG awaits re-implementation after getting rid of lime, shouldn't be too difficult however
 
-### Documentation: 64%
+### Documentation: 70%
 - A bunch of stuff still needs to be documented properly
 -> Include Code that has yet to be written.
 
-### Sound Effects Porting: 49%
+### Sound Effects Porting: 51%
 - The main implementation finally works completely as it should
 - Filters are completely ported
 
