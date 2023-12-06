@@ -31,8 +31,8 @@ This library isn't finished yet, so here's seperate progress reports and current
 - The main implementation finally works completely as it should
 - Filters are completely ported
 
-### Streamed Sound Playback: 4%
-- The broad idea is there, implementation following very soon
+### Streamed Sound Playback: 6%
+- The broad idea is there, implementation following very VERY soon
 
 ### Microphone Support: 0%
 - Microphone recording and playback support ARE planned, however really low on priority list right now. They will be added eventually that's given!
