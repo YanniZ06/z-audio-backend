@@ -7,10 +7,7 @@ import haxe.io.Bytes;
  */
 interface IStreamBase {
     // Processed chunks stored, older data indexed lower than "processLimit", current running chunk being indexed at "processLimit" and newer data indexed over "processLimit"
-    public var processedData:Vector<Bytes>;
-
-    // Same as the above but for reverse data (eg. chunk representing 00:01 in a 60 second song would be a chunk representing 00:59 here)
-    public var processedReverseData:Vector<Bytes>;
+    public var processedData:Vector<StreamChunk>;
 
      // Will define the maximum number of processedData to be stored at once, into one direction (same number is used for other direction aswell)
     public var processLimit(default, set):cpp.UInt8;
@@ -20,5 +17,5 @@ interface IStreamBase {
     public var proccessLength(default, null):Int;
 
     // Heavily WIP
-    public function seek(pos:Int):Void;
+    //public function seek(pos:Int):Void;
 }
