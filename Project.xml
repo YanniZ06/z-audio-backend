@@ -36,10 +36,11 @@
 	<!-- _______________________________ Libraries ______________________________ -->
 
 	<haxelib name="flixel" />
-	<haxelib name="HaxeAL-Soft" />
+	<haxelib name="HaxeAL-Soft"/>
 
 	<!-- Fuck off boring flixel sound system !!! -->
 	<haxedef name="FLX_NO_SOUND_SYSTEM"/>
+	<!-- <haxedef name ="windows" if="windows"> --> <!-- That would be stupid -->
 	<set name="lime_openal" value="false" />
 
 	<!--Optimise inputs, be careful you will get null errors if you don't use conditionals in your game-->

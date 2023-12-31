@@ -80,7 +80,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
      * The pitch of this sound, should be a positive value to avoid errors.
      * Modifies playback speed aswell.
      */
-    public var pitch(get, set):Float;
+    @:isVar public var pitch(get, set):Float;
 
     /**
      * The current gain/volume of the sound, should be positive to avoid errors.
@@ -96,7 +96,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
      * 
      * This feature might not always work as intended if set to decently high values.
      */
-    public var maxVolume(get, set):Float;
+    @:isVar public var maxVolume(get, set):Float;
 
     //private var actualVolume:Float = 1;
     /**
@@ -113,7 +113,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     /**
      * The current position of the song, in milliseconds.
      */
-    public var time(get, set):Float;
+    @:isVar public var time(get, set):Float;
     /**
      * The `activeSounds` Map adress this sound is contained in.
      */

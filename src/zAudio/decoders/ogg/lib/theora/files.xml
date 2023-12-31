@@ -1,0 +1,41 @@
+<xml>
+
+    <files id="native-toolkit-theora" tags="">
+
+        <cache value="1" />
+        <tag value="${NATIVE_TOOLKIT_OPTIM_TAG}" if="NATIVE_TOOLKIT_OPTIM_TAG" />
+
+        <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/theora/include/"/>
+        <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/ogg/include/"/>
+        <compilerflag value="-I${NATIVE_TOOLKIT_PATH}/vorbis/include/"/>
+
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/analyze.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/apiwrapper.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/bitpack.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/decapiwrapper.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/decinfo.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/decode.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/encode.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/encapiwrapper.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/encfrag.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/encinfo.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/enquant.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/dequant.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/fdct.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/fragment.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/huffdec.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/huffenc.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/idct.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/info.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/internal.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/mathops.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/mcenc.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/quant.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/rate.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/state.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/tokenize.c"/>
+        <file name="${NATIVE_TOOLKIT_PATH}/theora/src/theoraplay.cpp"/>
+
+    </files>
+
+</xml>
