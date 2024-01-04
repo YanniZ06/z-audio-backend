@@ -69,9 +69,9 @@ class VorbisFile {
 
     /**
      * Reads the info header of this VorbisFile.
-     * Fills channel and sampleRate information
+     * Fills channel and sampleRate information, aswell as fileSize
      */
-    public function readInfo() {
+    public function readInfoHeader() {
         final info = Ogg.ov_info(fVorbis, -1);
         sampleRate = info.rate;
         channels = info.channels;
@@ -85,15 +85,19 @@ class VorbisFile {
         var bytes:Bytes = Bytes.alloc(fSize);
         while(true) {
             final res = Ogg.ov_read(fVorbis, bytes.getData(), 0, 4096, OggEndian.TYPICAL, OggWord.TYPICAL, OggSigned.TYPICAL);
-            if(res == 0) break;
+            if(res == 0) break; // EOF
         }
         trace(bytes.getData()); // Yeah sure lets trace all of the content we just got. Good idea.
+        return bytes.getData();
     }
 
     /**
-     * Clears this VorbisFile and returns true if successful, otherwise false.
+     * Clears this VorbisFile along with all its contents and returns true if successful, otherwise false.
      */
-    public function dispose():Bool return Ogg.ov_clear(fVorbis) == 0 ? true : false;
+    public function dispose():Bool {
+        //TODO: free integers, strings and booleans aswell?
+        return Ogg.ov_clear(fVorbis) == 0 ? true : false;
+    }
 
     //converts return code to string
     static function code(_code:OggCode):String {
