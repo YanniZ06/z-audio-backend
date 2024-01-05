@@ -8,6 +8,7 @@ import haxe.http.HttpBase;
 import haxe.io.Bytes;
 import sys.io.File;
 import zAudio.al_handles.BufferHandle;
+import zAudio.decoders.MP3Decoder;
 import zAudio.decoders.errors.*;
 
 class SoundLoader
@@ -129,7 +130,8 @@ class SoundLoader
 		return mp3Load(bytes, filePath, preloadReverse);
 	}
 
-	//Avoid checking cache twice lol
+	// Load functions avoid having to check cache twice, do the actual decoding and loading in tasks
+
 	private static function oggLoad(filePath:String, preloadReverse:Bool):BufferHandle {
 /*		#if (lime_cffi && !macro)
 		@:privateAccess {
@@ -137,13 +139,13 @@ class SoundLoader
 			audioBuffer.data = new UInt8Array(Bytes.alloc(0));
 			NativeCFFI.lime_audio_load_bytes(bytes, audioBuffer);
 			
-			CacheHandler.existingBufferData.set(filePath, 
+			CacheHandler.cachedBuffers.set(filePath, 
 				new BufferHandle(HaxeAL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));
 			
 			//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 			var addressContainer = CacheHandler.activeSounds[filePath];
-			if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {cacheExists: true, hasReverseCache: preloadReverse, sounds: []});
-			else addressContainer.cacheExists = true;
+			if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
+			else addressContainer.markedForRemoval = false;
 			
 			return getCache(filePath);
 		}
@@ -151,7 +153,6 @@ class SoundLoader
 		return null;
 	}
 
-	//Same thing as for ogg
 	private static function wavLoad(bytes:Bytes, filePath:String, preloadReverse:Bool) {
 		var input = new haxe.io.BytesInput(bytes);
 		// Get all our infos from the WAV file (rapper gf got me onto a good start so if you see this, thank you :) )
@@ -167,64 +168,52 @@ class SoundLoader
 		input.position += 4; // should be data marker
 		final len = input.readInt32();
 		final rawData = input.read(len);
-		CacheHandler.existingBufferData.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
+		CacheHandler.cachedBuffers.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
 
 		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 		var addressContainer = CacheHandler.activeSounds[filePath];
-		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {cacheExists: true, hasReverseCache: preloadReverse, sounds: []});
-		else addressContainer.cacheExists = true;
+		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
+		else addressContainer.markedForRemoval = false;
 
 		return getCache(filePath);
 	}
 
 	//Must i repeat myself
 	private static function mp3Load(bytes:Bytes, filePath:String, preloadReverse:Bool) {
-		var mp3Info = zAudio.decoders.MP3Decoder.decodeMP3(bytes);
+		var decoder = new MP3Decoder(bytes);
+		decoder.decode();
+		final mp3Info = decoder.decodedInfo;
+		trace(mp3Info.channels);
+		trace(mp3Info.sampleRate);
 		
-		CacheHandler.existingBufferData.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(mp3Info.channels, 16, mp3Info.data, mp3Info.sampleRate, preloadReverse));
-		CacheHandler.existingBufferData[filePath].onCleanup = () -> { Native.free(cpp.NativeArray.address(mp3Info.data.getData(), 0).ptr); };
+		CacheHandler.cachedBuffers.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(mp3Info.channels, 16, mp3Info.data, mp3Info.sampleRate, preloadReverse));
+		CacheHandler.cachedBuffers[filePath].onCleanup = () -> { decoder.dispose(); decoder = null; };
 		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
 		var addressContainer = CacheHandler.activeSounds[filePath];
-		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {cacheExists: true, hasReverseCache: preloadReverse, sounds: []});
-		else addressContainer.cacheExists = true;
+		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
+		else addressContainer.markedForRemoval = false;
 
 		return getCache(filePath);
 	}
 
-	static function checkCache(address:String):BufferHandle {
-		var duplicate:BufferHandle = CacheHandler.existingBufferData[address];
-		if(duplicate != null) {
-			var buf = BufferHandle.copyFrom(duplicate);
-			@:privateAccess buf.cacheAddress = address;
-			return buf;
-		}
-		return null;
-	}
+	// Will remove one of these once I ensured copying the buffers is unnecessary
+	static inline function checkCache(address:String):BufferHandle return CacheHandler.cachedBuffers[address];
 
-	static function getCache(address:String):BufferHandle {
-		var buf = BufferHandle.copyFrom(CacheHandler.existingBufferData[address]);
-		@:privateAccess buf.cacheAddress = address;
-		return buf;
-	}
+	static inline function getCache(address:String):BufferHandle return CacheHandler.cachedBuffers[address];
 
 	// -- Utility loading functions --
 	// Used by WEB Loading
 	private static function bufferFromBytes(bytes:Bytes, path:String, preloadReverse:Bool):BufferHandle {
 		final fileSignature:String = bytes.getString(0, 4);
 
-		inline function finish(ret:BufferHandle) {
-			Native.free(Pointer.addressOf(fileSignature).ptr);
-			return ret;
-		}
-
 		switch (fileSignature) // File Signature
 		{
-			case "OggS": return finish(oggLoad(path, preloadReverse));
-			case "RIFF" if (bytes.getString(8, 4) == "WAVE"): return finish(wavLoad(bytes, path, preloadReverse));
+			case "OggS": return oggLoad(path, preloadReverse);
+			case "RIFF" if (bytes.getString(8, 4) == "WAVE"): return wavLoad(bytes, path, preloadReverse);
 			default:
 				switch ([bytes.get(0), bytes.get(1), bytes.get(2)])
 				{
-					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return finish(mp3Load(bytes, path, preloadReverse));
+					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return mp3Load(bytes, path, preloadReverse);
 					default: __eURL = UNSUPPORTED_FORMAT; trace('Invalid sound format or file-header "$fileSignature"!');
 				}
 		}
@@ -247,7 +236,6 @@ class SoundLoader
 
 		inline function finish(ret:BufferHandle) { // To make sure we close the fileinput before exiting this function
 			bytes.close();
-			Native.free(Pointer.addressOf(fileSignature).ptr);
 
 			return ret;
 		}
@@ -258,7 +246,6 @@ class SoundLoader
 			default:
 				bytes.seek(0, SeekBegin);
 				final mp3Signature = [bytes.readByte(), bytes.readByte(), bytes.readByte()];
-				trace(mp3Signature);
 
 				switch (mp3Signature)
 				{

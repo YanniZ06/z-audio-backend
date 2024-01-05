@@ -175,10 +175,10 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         if(!reverseChange) @:privateAccess changeCacheAddress(inputBuffer.cacheAddress);
     }
 
-    function changeCacheAddress(newAddress:String) {
+    private function changeCacheAddress(newAddress:String) {
         var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
         curAddressPtr.sounds.remove(this);
-        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) CacheHandler.activeSounds.remove(cacheAddress);
+        if(curAddressPtr.sounds.length < 1 && curAddressPtr.markedForRemoval) CacheHandler.removeFromCache(cacheAddress);
         
         cacheAddress = newAddress;
         CacheHandler.activeSounds[newAddress].sounds.push(this);
@@ -252,13 +252,13 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     public function destroy() {
         var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
         curAddressPtr.sounds.remove(this);
-        if(curAddressPtr.sounds.length < 1 && !curAddressPtr.cacheExists) CacheHandler.activeSounds.remove(cacheAddress);
+        if(curAddressPtr.sounds.length < 1 && curAddressPtr.markedForRemoval) CacheHandler.removeFromCache(cacheAddress);
         cacheAddress = null;
         curAddressPtr = null;
 
         if(efx_init) cleanup_EFX(); //Get rid of / unload all fx -> if available
 
-        buffer.destroy();
+        // buffer.destroy();
         source.destroy();
         if(finishTimer != null) {
             finishTimer.stop();

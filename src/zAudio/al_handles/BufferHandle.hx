@@ -75,7 +75,7 @@ class BufferHandle
 		for(snd in curCache.sounds)
 			snd.buffer.reverseData = reverseData;
 		
-		var bufCache = CacheHandler.existingBufferData[cacheAddress];
+		var bufCache = CacheHandler.cachedBuffers[cacheAddress];
 		if(bufCache != null) bufCache.reverseData = reverseData;
 	}
 

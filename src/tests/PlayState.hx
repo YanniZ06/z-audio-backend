@@ -59,7 +59,7 @@ class PlayState extends FlxState
 		/*new FlxTimer().start(15, (_) -> {
 			snd.destroy();
 			snd = null;
-			CacheHandler.clear_bufferCache();
+			CacheHandler.clearBufferCache();
 		});*/
 
 		/*var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/inspected.ogg"));
@@ -76,7 +76,10 @@ class PlayState extends FlxState
 		super.update(elapsed);
 
 		if(FlxG.keys.justPressed.C) {
-			CacheHandler.clear_bufferCache();
+			trace(CacheHandler.activeSounds);
+			CacheHandler.clearBufferCache();
+			trace(CacheHandler.activeSounds);
+			trace(CacheHandler.cachedBuffers);
 			trace("CACHE HAS BEEN CLEARED!");
 		}
 		if(FlxG.keys.justPressed.M) {
@@ -86,7 +89,7 @@ class PlayState extends FlxState
 			Gc.compact();
 			gcActive = !gcActive;
 			trace("GC ACTIVE: " + gcActive);
-			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${CacheHandler.existingBufferData} }');
+			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${CacheHandler.cachedBuffers} }');
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);

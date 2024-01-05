@@ -1762,25 +1762,50 @@ int8_t* DecodeMp3ToBuffer(unsigned char *buf, int music_size, uint32_t *sampleRa
 
 ')
 class MP3Decoder {
-    static public function decodeMP3(file:Bytes)
-    {
+    public var bytes:Bytes;
+    public var decodedInfo:Mp3Info = null;
+    
+    public function new(fileBytes:Bytes) {
+        bytes = fileBytes;
+    }
+
+    public function dispose() {
+        trace("Disposed mp3");
+        
+        Native.free(cpp.NativeArray.address(decodedInfo.data.getData(), 0).ptr);
+
+        bytes = null;
+        decodedInfo = null;
+
+        //Native.free(buf);
+        /*Native.free(sampleRatePtr);
+        Native.free(sampleCountPtr);
+        Native.free(channelPtr);*/
+        // Native.free(rawBuf);
+    }
+
+    public function decode() {
 		var totSampleCount:Int = 0;
 		var sampleRate:Int = 0;
 		var channels:Int= 0;
 
-        var raw:Star<Int8> = decodeMP3ToBuffer(
-                cast RawPointer.addressOf(file.getData())[0],
-                file.length,
-                cast RawPointer.addressOf(sampleRate),
-                cast RawPointer.addressOf(totSampleCount),
-                cast RawPointer.addressOf(channels)
+        var buf:Star<UInt8> = cast RawPointer.addressOf(bytes.getData())[0];
+        var sampleRatePtr:Star<UInt32> = cast RawPointer.addressOf(sampleRate);
+        var sampleCountPtr:Star<UInt32> = cast RawPointer.addressOf(totSampleCount);
+        var channelPtr:Star<UInt32> = cast RawPointer.addressOf(channels);
+
+        var rawBuf:Star<Int8> = decodeMP3ToBuffer(
+                buf,
+                bytes.length,
+                sampleRatePtr,
+                sampleCountPtr,
+                channelPtr
         );
 
-        var mp3Bytes:Bytes = rawBufferToBytes(raw,totSampleCount);
-
+        var mp3Bytes:Bytes = rawBufferToBytes(rawBuf,totSampleCount);
         trace("Generated new mp3.");
-        return
-        {
+
+        decodedInfo = {
             data:mp3Bytes,
             sampleCount:totSampleCount,
             sampleRate:sampleRate,
@@ -1788,7 +1813,17 @@ class MP3Decoder {
         };
     }
 
-    static public function encodeWav(buffer:Bytes,sampleCount:Int,sampleRate:Int,channels:Int):Bytes
+    function rawBufferToBytes(raw:Star<Int8>,length:Int):Bytes
+    {
+        var data = new BytesData();
+        cpp.NativeArray.setUnmanagedData(data, cast raw, length);
+        return Bytes.ofData(data);
+    }
+
+    @:native("DecodeMp3ToBuffer")
+	extern static function decodeMP3ToBuffer(buf:Star<UInt8>,music_size:Int,sampleRate:Star<UInt32>,totalSampleCount:Star<UInt32>,channels:Star<UInt32>):Star<Int8>;
+
+    /*public*/static function encodeWav(buffer:Bytes,sampleCount:Int,sampleRate:Int,channels:Int):Bytes
     {
         var nbit:Int = 16;
         var FORMAT_PCM:Int = 1;
@@ -1811,14 +1846,11 @@ class MP3Decoder {
         bo.writeBytes(buffer,0,sampleCount);
         return bo.getBytes();
     }
+}
 
-    static function rawBufferToBytes(raw:Star<Int8>,length:Int):Bytes
-    {
-        var data = new BytesData();
-        cpp.NativeArray.setUnmanagedData(data, cast raw, length);
-        return Bytes.ofData(data);
-    }
-
-    @:native("DecodeMp3ToBuffer")
-	extern static function decodeMP3ToBuffer(buf:Star<UInt8>,music_size:Int,sampleRate:Star<UInt32>,totalSampleCount:Star<UInt32>,channels:Star<UInt32>):Star<Int8>;
+typedef Mp3Info = {
+    var data:Bytes;
+    var sampleCount:Int;
+    var sampleRate:Int;
+    var channels:cpp.Int8;
 }

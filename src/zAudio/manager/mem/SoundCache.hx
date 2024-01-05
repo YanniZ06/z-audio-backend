@@ -2,12 +2,12 @@ package zAudio.manager.mem;
 
 typedef SoundCache = {
     /**
-     * Whether the sound is currently in cache or not.
-     * If false, once all sounds have been gotten rid of, memory will be available for clearing.
+     * Whether the sound is currently marked for removal or not.
+     * If true, once all sounds have been gotten rid of, memory will be available for clearing.
      * 
-     * This SoundCache entry will also disappear as soon as the condition `cacheExists == false && sounds.length == 0` is met.
+     * This SoundCache entry will disappear as soon as the condition `markedForRemoval == true && sounds.length == 0` is met.
      */
-    var cacheExists:Bool;
+    var markedForRemoval:Bool;
     
     /**
      * Whether the sound currently has reverse audio cached or not.

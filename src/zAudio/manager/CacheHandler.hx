@@ -11,7 +11,7 @@ class CacheHandler {
      * 
      * Sounds are stored in the caches "sounds" array.
      * 
-     * Information about existing cached buffer data is defined by "cacheExists".
+     * Information about existing cached buffer data is defined by "markedForRemoval".
      * 
      * Information about existing reverse sound data is defined by "hasReverseCache".
      */
@@ -22,58 +22,79 @@ class CacheHandler {
      * 
      * Holds no other relevant cache info.
      */
-    public static var existingBufferData:Map<String, BufferHandle> = [];
+    public static var cachedBuffers:Map<String, BufferHandle> = [];
 
     /**
-     * A map containing all paths to sounds you want to keep cached after a `clear_bufferCache` call.
+     * A map containing all paths to sounds you want to keep cached after a `clearBufferCache()` call.
      * 
      * Every path in this map needs to be removed manually, so keep that in mind.
      *
      * Simply do `keepCacheSounds.set("yourAsset_orWebPath.wav_or_ogg", true)` to keep a sound safe from general buffer cache clearing.
      * 
-     * `removeFromCache` will remove a sound from cache regardless of if its kept in here!
+     * `markCacheRemoval()` will remove a sound from cache regardless of if its kept in here!
      */
     public static var keepCacheSounds:Map<String, Bool> = [];
 
     /**
-     * Simply clears the entire `existingBufferData` cache, with the exception of all paths in `keepCacheSounds`.
+     * Simply marks the entire `cachedBuffers` cache for removal, with the exception of all paths in `keepCacheSounds`.
      * 
      * The memory for a cache will be cleared once all sounds using the cache have been destroyed.
      * 
-     * This function force-calls the garbage collector and does a major collection.
+     * This function will call the garbage collector when the marked caches are ready to be cleared.
      */
-    public static function clear_bufferCache():Void {
-        for(n => buf in existingBufferData) {
+    public static function markFullCache():Void {
+        for(n => buf in cachedBuffers) {
             if(keepCacheSounds[n] != null) continue;
-
-            if(activeSounds[n].sounds.length < 1) activeSounds.remove(n);
-            else activeSounds[n].cacheExists = false;
-            
-            existingBufferData.remove(n);
-            buf.destroy();
-            buf = null;
+            markCacheRemoval(n);
         }
-        cpp.vm.Gc.run(true);
-        cpp.vm.Gc.compact();
     }
 
     /**
-     * Removes the sound stored at `path` from the cache, clearing memory once no more sounds referencing the cache exist.
+     * Marks the sound stored at `path` for removal from the cache, clearing memory once no more sounds referencing the cache exist.
      * 
      * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
-     * 
      * If you need to check whether this is the case, use `existsInCache`.
      * 
-     * This function does not force-call the garbage collector.
+     * This function will call the garbage collector when the cache is ready to be cleared.
+     * @param path The cacheAddress/path to the sound to mark for removal.
      */
-    public static function removeFromCache(path:String):Void {
-        var buf = existingBufferData[path];
-        if(activeSounds[path] != null) activeSounds[path].cacheExists = false;
+    public static inline function markCacheRemoval(path:String):Void { 
+        if(activeSounds[path].sounds.length < 1) removeFromCache(path);
+        else activeSounds[path].markedForRemoval = true;
+    }
 
-        if(keepCacheSounds[path] != null) keepCacheSounds.remove(path);
-        existingBufferData.remove(path);
+    /**
+     * Unmarks the sound stored at `path` for removal from the cache.
+     * 
+     * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
+     * If you need to check whether this is the case, use `existsInCache`.
+     * 
+     * This function only makes sense to call for sounds that are marked for removal.
+     * @param path The cacheAddress/path to the sound to mark for removal.
+     */
+    public static inline function unmarkCacheRemoval(path:String):Void activeSounds[path].markedForRemoval = false;
+
+    /**
+     * Returns whether the sound stored at `path` is marked for removal from the cache or not.
+     * 
+     * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
+     * If you need to check whether this is the case, use `existsInCache`.
+     * @param path 
+     * @return Void return activeSounds[path].markedForRemoval
+     */
+    public static inline function isCacheMarked(path:String):Void return activeSounds[path].markedForRemoval;
+
+    @:allow(zAudio.Sound)
+    static function removeFromCache(path:String):Void {
+        var buf = cachedBuffers[path];
+        activeSounds.remove(path);
+
+        cachedBuffers.remove(path);
         buf.destroy();
         buf = null;
+
+        cpp.vm.Gc.run(false);
+        cpp.vm.Gc.compact();
     }
 
     /**
@@ -92,7 +113,7 @@ class CacheHandler {
     public static function removeFromMemory(snd:Sound, destroyAll:Bool = false) {
         if(destroyAll) {
             final address = snd.cacheAddress;
-            var i = 0;
+            markCacheRemoval(address);
             for(i in 0...activeSounds[address].sounds.length) {
                 trace(i);
 
@@ -103,11 +124,7 @@ class CacheHandler {
                 }
                 activeSounds[address].sounds[i].destroy();
             }
-            activeSounds[address].sounds = [];
-            activeSounds.remove(address);
-            if(existsInCache(address)) removeFromCache(address); //Address removal also happens here on its own
 
-            cpp.vm.Gc.run(false);
             return;
         }
 
@@ -130,14 +147,13 @@ class CacheHandler {
             snd.reversed = false;
             snd.buffer.reverseData = null;
         }
-        var bufCache = existingBufferData[path];
-        if(bufCache != null) bufCache.reverseData = null;
+        cachedBuffers[path].reverseData = null;
 
         cpp.vm.Gc.run(false);
     }
 
     /**
-     * Returns true if a buffer to a sound stored at `path` is found in the buffer-cache, otherwise false.
+     * Returns true if a buffer to a sound stored at `path` is found in the cache, otherwise false.
      */
-    public static function existsInCache(path:String):Bool return existingBufferData[path] != null;
+    public static function existsInCache(path:String):Bool return cachedBuffers[path] != null;
 }
