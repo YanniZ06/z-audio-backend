@@ -5,7 +5,7 @@ package zAudio.al_handles;
  */
 class SourceHandle
 {
-	public var handle:ALSource = 0; // DOCUMENT THIS
+	public var handle:ALSource = 0; // TODO: DOCUMENT THIS
 	public var buffer:BufferHandle = null;
 	public var parentSound:Sound = null;
 	public var hasFilter:Bool = false;

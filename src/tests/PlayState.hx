@@ -27,7 +27,7 @@ class PlayState extends FlxState
 		snd2 = new ZSound(soundInfo);
 		snd2.time = 6000;
 		//snd2.play();
-		new FlxTimer().start(6, _ -> CacheHandler.removeFromMemory(snd2));*/
+		new FlxTimer().start(6, _ -> CacheHandler.removeFromMemory("assets/snd/wavTest.wav"));*/
 
 		snd = new ZSound(SoundLoader.fromFile("assets/snd/michealMp3.mp3"));
 		snd.bandpass.enabled = false;
@@ -35,6 +35,13 @@ class PlayState extends FlxState
 		snd.maxVolume = 10;
 		snd.looping = true;
 		snd.reverb.enabled = true;
+
+		snd2 = new ZSound(SoundLoader.fromFile("assets/snd/michealMp3.mp3"));
+		snd2.bandpass.enabled = false;
+		snd2.bandpass.gain_lf = 0.1;
+		snd2.maxVolume = 10;
+		snd2.looping = true;
+		snd2.reverb.enabled = true;
 
 		//snd.position.x = 80;
 
@@ -59,7 +66,7 @@ class PlayState extends FlxState
 		/*new FlxTimer().start(15, (_) -> {
 			snd.destroy();
 			snd = null;
-			CacheHandler.clearBufferCache();
+			CacheHandler.markFullCache();
 		});*/
 
 		/*var snd_ = new FlxSound().loadEmbedded(Sound.fromFile("assets/snd/inspected.ogg"));
@@ -76,11 +83,10 @@ class PlayState extends FlxState
 		super.update(elapsed);
 
 		if(FlxG.keys.justPressed.C) {
-			trace(CacheHandler.activeSounds);
-			CacheHandler.clearBufferCache();
-			trace(CacheHandler.activeSounds);
-			trace(CacheHandler.cachedBuffers);
-			trace("CACHE HAS BEEN CLEARED!");
+			trace(CacheHandler.soundCache);
+			CacheHandler.markFullCache();
+			trace(CacheHandler.soundCache);
+			trace("CACHE HAS BEEN MARKED FOR CLEARING!");
 		}
 		if(FlxG.keys.justPressed.M) {
 			trace("GC CALLED!!!");
@@ -89,7 +95,7 @@ class PlayState extends FlxState
 			Gc.compact();
 			gcActive = !gcActive;
 			trace("GC ACTIVE: " + gcActive);
-			trace('CURRENT MEMORY INFO:\n\nACTIVE SOUNDS: { ${CacheHandler.activeSounds} }\n\nEXISTING BUFFERS: { ${CacheHandler.cachedBuffers} }');
+			trace('CURRENT CACHE\n\n: { ${CacheHandler.soundCache} }');
 		}
 		if(snd == null) return;
 		FlxG.watch.addQuick("Initialized:", snd.initialized);
@@ -102,7 +108,10 @@ class PlayState extends FlxState
 		FlxG.watch.addQuick("Volume:", snd.volume);
 		if(FlxG.keys.justPressed.S) snd.stop();
 		if(FlxG.keys.justPressed.P) snd.pause();
-		if(FlxG.keys.justPressed.SPACE) snd.play();
+		if(FlxG.keys.justPressed.SPACE) { 
+			snd.play();
+			new FlxTimer().start(1, _ -> snd2.play()); //test
+		}
 
 		var mod = FlxG.keys.pressed.SHIFT ? 3 : 1;
 		var negMod = FlxG.keys.pressed.CONTROL ? -1 : 1;
@@ -138,7 +147,7 @@ class PlayState extends FlxState
 		}
 		if(FlxG.keys.justPressed.K) {
 			FlxTween.cancelTweensOf(snd);
-			CacheHandler.removeFromMemory(snd, true);
+			CacheHandler.removeFromMemory(snd.cacheAddress);
 			snd = null;
 			//CacheHandler.removeReverseCacheFrom(snd.cacheAddress);
 			trace("SOUND HAS BEEN DESTROYED!");

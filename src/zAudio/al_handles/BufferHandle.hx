@@ -20,12 +20,13 @@ class BufferHandle
 	/**
 	 * Called after destroy is completed, to clean up any other related variables (for mp3's to name an example)
 	 */
-	public var onCleanup:Void->Void = () -> {};
+	public var onCleanup:Void->Void = null;
 
 	public function new(buffer:ALBuffer) {
 		handle = buffer;
 	}
 
+	@:allow(zAudio.SoundLoader)
 	@:noCompletion private var cacheAddress:String = "";
 	/**
 	 * Fills the buffer with informations about the sound. Can only be used once per handle and is only really used on the `SoundLoader`.
@@ -37,22 +38,27 @@ class BufferHandle
 	 * @return This buffer, for chaining purposes.
 	 */
 	public function fill(channels:Int, bitsPerSample:Int, data:Bytes, sampleRate:Int, doPreloadReverseData:Bool = true):BufferHandle {
-		this.channels = channels;
-		this.bitsPerSample = bitsPerSample;
 		this.data = data;
 		if(doPreloadReverseData) preloadReverseData();
-		this.sampleRate = sampleRate;
+		fill_Info(channels, bitsPerSample, sampleRate);
 
-		format = resolveFormat(bitsPerSample, channels);
 		HaxeAL.bufferData(handle, format, data, dataLength, sampleRate);
-		samples = Std.int((dataLength * 8) / (channels * bitsPerSample));
 
-		@:privateAccess if(parentSource != null) {
-			parentSource.parentSound.changeLength(Std.int(samples / sampleRate * 1000)/*- offset*/);
+		/*if(parentSource != null) {
+			parentSource.parentSound.changeLength(Std.int(samples / sampleRate * 1000));
 			parentSource.parentSound.initialized = true;
-		}
+		}*/
 
 		return this;
+	}
+
+	@:allow(zAudio.SoundLoader)
+	private inline function fill_Info(channels:Int, bitsPerSample:Int, sampleRate:Int) {
+		this.channels = channels;
+		this.bitsPerSample = bitsPerSample;
+		this.sampleRate = sampleRate;
+		format = resolveFormat(bitsPerSample, channels);
+		samples = Std.int((dataLength * 8) / (channels * bitsPerSample));
 	}
 
 	/**
@@ -68,15 +74,14 @@ class BufferHandle
 		for(byteI in 0...dataArr.length) { reversed[byteI] = dataArr[dataArr.length - byteI]; } //Set byte from back of data array to front of reversed array
 		reverseData = reversed.getData().bytes;
 
-		var curCache = CacheHandler.activeSounds[cacheAddress];
-		if(curCache == null) return;
+		var curCache = CacheHandler.soundCache[cacheAddress];
+		//if(curCache == null) return;
 
 		curCache.hasReverseCache = true;
 		for(snd in curCache.sounds)
 			snd.buffer.reverseData = reverseData;
 		
-		var bufCache = CacheHandler.cachedBuffers[cacheAddress];
-		if(bufCache != null) bufCache.reverseData = reverseData;
+		curCache.buffer.reverseData = reverseData;
 	}
 
 	/**
@@ -92,7 +97,7 @@ class BufferHandle
 		reverseData = null;
 		cacheAddress = null;
 
-		onCleanup();
+		if(onCleanup != null) onCleanup();
 	}
 	
 	/**
@@ -104,7 +109,7 @@ class BufferHandle
 	 * @param b2 The buffer to copy all the data from.
 	 * @return A buffer with the same data.
 	 */
-	public static function copyFrom(b2:BufferHandle):BufferHandle {
+	public static function copyFrom(b2:BufferHandle):BufferHandle { // TODO: get rid of this
 		var b:BufferHandle = new BufferHandle(HaxeAL.createBuffer());
 		if(b2.data != null) b.fill(b2.channels, b2.bitsPerSample, b2.data, b2.sampleRate, false);
 		if(b2.reverseData != null) b.reverseData = b2.reverseData;
@@ -113,7 +118,7 @@ class BufferHandle
 		return b;
 	}
 
-	public function toString():String return 'BufferHandle(data: $data, parentSource: $parentSource)';
+	public function toString():String return 'BufferHandle(file: ${cacheAddress ?? 'unknown'} | parentSource: $parentSource)';
 
 	static final formats8 = [HaxeAL.FORMAT_MONO8, HaxeAL.FORMAT_STEREO8];
 	static final formats16 = [HaxeAL.FORMAT_MONO16, HaxeAL.FORMAT_STEREO16];

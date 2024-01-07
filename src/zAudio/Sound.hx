@@ -115,7 +115,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
      */
     @:isVar public var time(get, set):Float;
     /**
-     * The `activeSounds` Map adress this sound is contained in.
+     * The `soundCache` Map adress this sound is contained in.
      */
     public var cacheAddress:String = "";
     /**
@@ -152,7 +152,9 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
         if(initializeEFX) init_EFX(this);
 
-        CacheHandler.activeSounds[cacheAddress].sounds.push(this);
+        trace(CacheHandler.soundCache);
+        trace(cacheAddress);
+        CacheHandler.soundCache[cacheAddress].sounds.push(this);
 
         finishTimer = new Timer(500); //Avoid a null ref when destroying sound that hasnt been played once (whyever you'd do that)
         finishTimer.stop();
@@ -176,12 +178,12 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     }
 
     private function changeCacheAddress(newAddress:String) {
-        var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
+        var curAddressPtr = CacheHandler.soundCache[cacheAddress];
         curAddressPtr.sounds.remove(this);
         if(curAddressPtr.sounds.length < 1 && curAddressPtr.markedForRemoval) CacheHandler.removeFromCache(cacheAddress);
         
         cacheAddress = newAddress;
-        CacheHandler.activeSounds[newAddress].sounds.push(this);
+        CacheHandler.soundCache[newAddress].sounds.push(this);
     }
 
     /**
@@ -249,8 +251,8 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
 	 * Destroys this Sound and renders it unuseable.
 	 * Memory will be cleared the next time the garbage collector is activated.
 	 */
-    public function destroy() {
-        var curAddressPtr = CacheHandler.activeSounds[cacheAddress];
+    public function destroy() {        
+        var curAddressPtr = CacheHandler.soundCache[cacheAddress];
         curAddressPtr.sounds.remove(this);
         if(curAddressPtr.sounds.length < 1 && curAddressPtr.markedForRemoval) CacheHandler.removeFromCache(cacheAddress);
         cacheAddress = null;
@@ -271,6 +273,9 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         timeSetter = null;
         onFinish = null;
     }
+
+    // TODO: quick destroy function (aka literally just get rid of that removal mark checker), this sounds irrelevant but if we getting rid of like 20-25 diff sounds at once
+    // TODO: this could be pretty decent way to save on a few ms. micro optimization at that level so maybe i just make destroy "quicker" overall???
 
     function switchPlaying() {
         byteOffsetGetter = !playing ? getByteOffset_Paused : getByteOffset_Playing;

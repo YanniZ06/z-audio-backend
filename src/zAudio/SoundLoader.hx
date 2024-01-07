@@ -133,18 +133,24 @@ class SoundLoader
 	// Load functions avoid having to check cache twice, do the actual decoding and loading in tasks
 
 	private static function oggLoad(filePath:String, preloadReverse:Bool):BufferHandle {
-/*		#if (lime_cffi && !macro)
+/*		
+		var buffer = new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse);
+		buffer.cacheAddress = filePath;
+		CacheHandler.soundCache[filepath].buffer = buffer;
+		
+		#if (lime_cffi && !macro)
 		@:privateAccess {
 			var audioBuffer = new AudioBuffer();
 			audioBuffer.data = new UInt8Array(Bytes.alloc(0));
 			NativeCFFI.lime_audio_load_bytes(bytes, audioBuffer);
 			
-			CacheHandler.cachedBuffers.set(filePath, 
-				new BufferHandle(HaxeAL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse));
+			// this syntax wont work!! wahahaha
+			CacheHandler.soundCache[filePath].buffer = 
+				new BufferHandle(HaxeAL.createBuffer()).fill(audioBuffer.channels, audioBuffer.bitsPerSample, cast audioBuffer.data, audioBuffer.sampleRate, preloadReverse);
 			
 			//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
-			var addressContainer = CacheHandler.activeSounds[filePath];
-			if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
+			var addressContainer = CacheHandler.soundCache[filePath];
+			if(addressContainer == null) CacheHandler.soundCache.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
 			else addressContainer.markedForRemoval = false;
 			
 			return getCache(filePath);
@@ -168,12 +174,10 @@ class SoundLoader
 		input.position += 4; // should be data marker
 		final len = input.readInt32();
 		final rawData = input.read(len);
-		CacheHandler.cachedBuffers.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse));
 
-		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
-		var addressContainer = CacheHandler.activeSounds[filePath];
-		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
-		else addressContainer.markedForRemoval = false;
+		var buffer = new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse);
+		buffer.cacheAddress = filePath;
+		CacheHandler.soundCache.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: [], buffer: buffer});
 
 		return getCache(filePath);
 	}
@@ -183,23 +187,41 @@ class SoundLoader
 		var decoder = new MP3Decoder(bytes);
 		decoder.decode();
 		final mp3Info = decoder.decodedInfo;
-		trace(mp3Info.channels);
-		trace(mp3Info.sampleRate);
 		
-		CacheHandler.cachedBuffers.set(filePath, new BufferHandle(HaxeAL.createBuffer()).fill(mp3Info.channels, 16, mp3Info.data, mp3Info.sampleRate, preloadReverse));
-		CacheHandler.cachedBuffers[filePath].onCleanup = () -> { decoder.dispose(); decoder = null; };
-		//Edge-case where address is scheduled for deletion but reassigned before all related sounds are destroyed.
-		var addressContainer = CacheHandler.activeSounds[filePath];
-		if(addressContainer == null) CacheHandler.activeSounds.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: []});
-		else addressContainer.markedForRemoval = false;
+		var buffer = new BufferHandle(HaxeAL.createBuffer()).fill(mp3Info.channels, 16, mp3Info.data, mp3Info.sampleRate, preloadReverse);
+		buffer.cacheAddress = filePath;
+		buffer.onCleanup = () -> { decoder.dispose(); decoder = null; };
+
+		CacheHandler.soundCache.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: [], buffer: buffer});
 
 		return getCache(filePath);
 	}
 
-	// Will remove one of these once I ensured copying the buffers is unnecessary
-	static inline function checkCache(address:String):BufferHandle return CacheHandler.cachedBuffers[address];
+	// TODO: test this!!
+	static inline function checkCache(address:String):Null<BufferHandle> {
+		var cache = CacheHandler.soundCache[address];
+		if(cache == null) return null;
 
-	static inline function getCache(address:String):BufferHandle return CacheHandler.cachedBuffers[address];
+		var buf:BufferHandle = new BufferHandle(cache.buffer.handle);
+		buf.data = cache.buffer.data;
+		buf.reverseData = cache.buffer.reverseData;
+		buf.cacheAddress = address;		
+		buf.fill_Info(cache.buffer.channels, cache.buffer.bitsPerSample, cache.buffer.sampleRate);
+
+		return buf;
+	}
+
+	static inline function getCache(address:String):BufferHandle {
+		var cache = CacheHandler.soundCache[address];
+
+		var buf:BufferHandle = new BufferHandle(cache.buffer.handle);
+		buf.data = cache.buffer.data;
+		buf.reverseData = cache.buffer.reverseData;
+		buf.cacheAddress = address;		
+		buf.fill_Info(cache.buffer.channels, cache.buffer.bitsPerSample, cache.buffer.sampleRate);
+
+		return buf;
+	}
 
 	// -- Utility loading functions --
 	// Used by WEB Loading

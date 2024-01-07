@@ -61,7 +61,7 @@ class SoundSettings {
     // -- SETTERS FOR OPTIONS THAT REQUIRE THEM -- //
     static function set_globalVolume(vol:Float):Float {
         globalVolume = vol;
-        //for(cache in activeSounds) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
+        //for(cache in soundCache) { for(sound in cache.sounds) sound.volume = sound.volume; } //Activate setter
         HaxeAL.listenerf(HaxeAL.GAIN, globalVolume);
         return vol;
     }

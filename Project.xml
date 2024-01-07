@@ -37,9 +37,11 @@
 
 	<haxelib name="flixel" />
 	<haxelib name="HaxeAL-Soft"/>
+	<haxelib name="hxcpp-debug-server"/>
 
 	<!-- Fuck off boring flixel sound system !!! -->
-	<haxedef name="FLX_NO_SOUND_SYSTEM"/>
+	<haxedef name="FLX_NO_SOUND_SYSTEM" value="true"/>
+
 	<!-- <haxedef name ="windows" if="windows"> --> <!-- That would be stupid -->
 	<set name="lime_openal" value="false" />
 

@@ -18,4 +18,9 @@ typedef SoundCache = {
      * All Sound instances currently loaded in.
      */
     var sounds:Array<Sound>;
+
+    /**
+     * The buffer for this cache.
+     */
+    var buffer:BufferHandle;
 }
