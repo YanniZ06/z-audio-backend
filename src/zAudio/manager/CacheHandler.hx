@@ -108,7 +108,7 @@ class CacheHandler {
 
         markCacheRemoval(path);
         for(i in 0...sounds.length) {
-            var sound = sounds[i];
+            var sound = sounds[0];
             trace(i);
             trace(sound);
             if(sound == null) { // ?? todo

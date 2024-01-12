@@ -2,6 +2,7 @@ package zAudio.al_handles;
 
 import haxe.io.Bytes;
 import haxe.io.Int32Array;
+import lime.system.BackgroundWorker;
 
 class BufferHandle
 {
@@ -92,7 +93,6 @@ class BufferHandle
 		if(parentSource != null) parentSource.detachBuffer();
 		parentSource = null;
 
-		HaxeAL.deleteBuffer(handle);
 		data = null;
 		reverseData = null;
 		cacheAddress = null;

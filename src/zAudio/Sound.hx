@@ -260,7 +260,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
 
         if(efx_init) cleanup_EFX(); //Get rid of / unload all fx -> if available
 
-        // buffer.destroy();
+        buffer.destroy();
         source.destroy();
         if(finishTimer != null) {
             finishTimer.stop();

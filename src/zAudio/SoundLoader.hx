@@ -52,7 +52,7 @@ class SoundLoader
 
 		var retBuffer:BufferHandle = null;
 		req.onBytes = bytes -> retBuffer = bufferFromBytes(bytes, url, pr);
-		req.onError = err -> { __eURL = BAD_GATEWAY; trace('Error "$err"\nCould not obtain bytes for url "$url"!'); }
+		req.onError = err -> { __eURL = BAD_GATEWAY; #if ZAUDIO_DEBUG trace('Error "$err"\nCould not obtain bytes for url "$url"!'); #end }
 
 		req.request(false);
 		return retBuffer;
@@ -236,7 +236,7 @@ class SoundLoader
 				switch ([bytes.get(0), bytes.get(1), bytes.get(2)])
 				{
 					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return mp3Load(bytes, path, preloadReverse);
-					default: __eURL = UNSUPPORTED_FORMAT; trace('Invalid sound format or file-header "$fileSignature"!');
+					default: __eURL = UNSUPPORTED_FORMAT; #if ZAUDIO_DEBUG trace('Invalid sound format or file-header "$fileSignature"!'); #end
 				}
 		}
 		return null;
@@ -250,6 +250,7 @@ class SoundLoader
 		try { bytes = File.read(path); }
 		catch(e) {
 			__eFILE = FILE_NOT_FOUND;
+			#if ZAUDIO_DEBUG trace('Could not find or access file at "$path"'); #end
 			return null;
 		}
 
@@ -272,7 +273,7 @@ class SoundLoader
 				switch (mp3Signature)
 				{
 					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return finish(mp3Load(bytes.readAll(), path, preloadReverse));
-					default: __eFILE = UNSUPPORTED_FORMAT; trace('Invalid sound format or file-header "$fileSignature"!');
+					default: __eFILE = UNSUPPORTED_FORMAT; #if ZAUDIO_DEBUG trace('Invalid sound format or file-header "$fileSignature"!'); #end
 				}
 		}
 		return null;

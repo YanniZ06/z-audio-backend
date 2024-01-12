@@ -41,6 +41,8 @@
 
 	<!-- Fuck off boring flixel sound system !!! -->
 	<haxedef name="FLX_NO_SOUND_SYSTEM" value="true"/>
+	<haxedef name="HAXEAL_DEBUG" value="true"/>
+
 
 	<!-- <haxedef name ="windows" if="windows"> --> <!-- That would be stupid -->
 	<set name="lime_openal" value="false" />

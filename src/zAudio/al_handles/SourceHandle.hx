@@ -56,6 +56,7 @@ class SourceHandle
 		HaxeAL.sourcei(handle, HaxeAL.BUFFER, null);
 		buffer.parentSource = null;
 		
+		trace(buffer);
 		//buffer.destroy(); // We cannot safely destroy this buffer because it's not a copy
 		buffer = null;
 
