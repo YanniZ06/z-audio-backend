@@ -92,6 +92,25 @@ class BufferHandle
 	public function destroy() {
 		if(parentSource != null) parentSource.detachBuffer();
 		parentSource = null;
+		HaxeAL.deleteBuffer(handle);
+
+		data = null;
+		reverseData = null;
+		cacheAddress = null;
+
+		if(onCleanup != null) onCleanup();
+	}
+
+	/**
+	 * Destroys this Buffer and renders it unuseable, querying it for deletion.
+	 * The query-list can be cleared using `CacheHandler.queryCache.clearBufferQuery()`.
+	 * 
+	 * Memory will be cleared when the buffer has been deleted and the garbage collector has been activated.
+	 */
+	public function queryDestroy() {
+		if(parentSource != null) parentSource.detachBuffer();
+		parentSource = null;
+		CacheHandler.queryCache.bufferCleanQuery.push(handle);
 
 		data = null;
 		reverseData = null;

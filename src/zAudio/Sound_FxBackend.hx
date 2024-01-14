@@ -90,16 +90,16 @@ class Sound_FxBackend {
      * Only gets called on sounds when efx_init is true
      */
     public function cleanup_EFX() {
-        reverb.destroy();
+        reverb.queryDestroy();
         reverb = null;
-        chorus.destroy();
+        chorus.queryDestroy();
         chorus = null;
 
-        lowpass.destroy();
+        lowpass.queryDestroy();
         lowpass = null;
-        highpass.destroy();
+        highpass.queryDestroy();
         highpass = null;
-        bandpass.destroy();
+        bandpass.queryDestroy();
         bandpass = null;
     }
 }

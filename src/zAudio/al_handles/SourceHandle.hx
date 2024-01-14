@@ -64,6 +64,7 @@ class SourceHandle
 		parentSound.initialized = false;
 	}
 
+	// TODO: queryDestroy
 	/**
 	 * Gets rid of `this` SourceHandle and renders it unuseable.
 	 * Also destroys the connected buffer in the process.
@@ -75,7 +76,7 @@ class SourceHandle
 		HaxeAL.deleteSource(handle);
 		
 		parentSound.source = null;
-		parentSound.initialized = false; //Should be false eitherway but just making sure
+		parentSound.initialized = false; //Should be false eitherway but just making sure // todo ??? check this, maybe we are setting something for no reason!!
 		parentSound = null;
 	}
 }

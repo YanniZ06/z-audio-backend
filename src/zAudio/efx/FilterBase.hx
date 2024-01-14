@@ -28,10 +28,23 @@ class FilterBase extends FXBase {
 	 * Destroys this Filter and renders it unuseable, also freeing its allocated memory.
 	 */
 	override public function destroy() {
-		enabled = false;
+		removeDirectFilter();
+		@:privateAccess _snd.activeFilter = null;
+		sourceRef.hasFilter = false;
+
 		super.destroy();
 
-		if(filter != 0) HaxeEFX.deleteFilter(filter);
+		HaxeEFX.deleteFilter(filter);
+	}
+
+	public function queryDestroy() {
+		removeDirectFilter();
+		@:privateAccess _snd.activeFilter = null;
+		sourceRef.hasFilter = false;
+
+		super.destroy();
+
+		// CacheHandler.queryCache;
 	}
 
 	function set_enabled(val:Bool):Bool {

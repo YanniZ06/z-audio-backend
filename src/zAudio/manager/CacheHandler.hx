@@ -1,5 +1,7 @@
 package zAudio.manager;
 
+import zAudio.manager.mem.*;
+
 /**
  * Class responsible for global sound and buffer cache handling aswell as memory management.
  * 
@@ -15,18 +17,23 @@ class CacheHandler {
      * 
      * Information about existing reverse sound data is defined by "hasReverseCache".
      */
-    public static var soundCache:Map<String, zAudio.manager.mem.SoundCache> = [];
+    public static var soundCache:Map<String, SoundCache> = [];
 
     /**
      * A map containing all paths to sounds you want to keep cached after a `markFullCache()` call.
      * 
-     * Every path in this map needs to be removed manually, so keep that in mind.
+     * Every path in this map needs to be removed manually (by you), so keep that in mind.
      *
-     * Simply do `keepCacheSounds.set("yourAsset_orWebPath.wav_or_ogg", true)` to keep a sound safe from general buffer cache clearing.
+     * Simply do `keepCacheSounds.set("yourAsset_orWebPath.wav_or_ogg", true)` to keep a sound safe from general buffer cache clearing (`markFullCache()`).
      * 
      * `markCacheRemoval()` will remove a sound from cache regardless of if its kept in here!
      */
     public static var keepCacheSounds:Map<String, Bool> = [];
+
+    /**
+     * Represents the cache of objects queried for deletion.
+     */
+    public static var queryCache:QueryCache = new QueryCache();
 
     /**
      * Simply marks the entire `soundCache` for removal, with the exception of all paths in `keepCacheSounds`.
@@ -91,7 +98,7 @@ class CacheHandler {
     }
 
     /**
-     * Removes all sounds with `path` cache address, clearing their associated cache from the memory entirely.
+     * Removes all sounds with `path` cache address efficiently, clearing their associated cache from the memory entirely.
      * 
      * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
      * If you need to check whether this is the case, use `existsInCache`.
@@ -103,29 +110,14 @@ class CacheHandler {
      */
     public static function removeFromMemory(path:String) {
         var sounds = soundCache[path].sounds;
-        var cleanManually:Bool = false; //  ?? todo
-        trace(sounds);
+        // var cleanManually:Bool = false;
 
-        markCacheRemoval(path);
         for(i in 0...sounds.length) {
             var sound = sounds[0];
-            trace(i);
-            trace(sound);
-            if(sound == null) { // ?? todo
-                cleanManually = true;
-                continue;
-            }
-            sound.destroy();
+            sound.queryDestroy();
         }
-        trace(sounds);
-        
-        // We cannot remove "null" from our array so we need to do the cleaning on our own afterwards
-        if(!cleanManually) { #if !ZAUDIO_DISALLOW_GC cpp.vm.Gc.run(false); #end return; } 
-        // TODO: code that the rest of the array is manually cleaned when null is found OR just ensure null cannot be in the array (latter would be better)
-
-        #if !ZAUDIO_DISALLOW_GC 
-        cpp.vm.Gc.run(false); 
-        #end 
+        removeFromCache(path); // Clear cache
+        queryCache.clearFullQuery(); // Get rid of everything at once
     }
 
     /**

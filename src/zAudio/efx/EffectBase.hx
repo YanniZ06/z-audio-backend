@@ -26,7 +26,7 @@ class EffectBase extends FXBase {
 	 */
 	public var mix(get, set):Float;
 
-
+	// todo: grant access to the effect itself and its aux slot?? we wanna be as open as possible
 	private var effect:ALEffect = 0;
 	private var type:Int = ALEffectType.EFFECT_NULL;
 	private var aux:AuxSlotHandle = null;
@@ -56,7 +56,7 @@ class EffectBase extends FXBase {
 	}
 
 	/**
-	 * Unloads this effect up and renders it unuseable, freeing memory.
+	 * Unloads this effect up and renders it unuseable until loaded again, freeing memory.
 	 * 
 	 * Should not be used if loaded has the value false.
 	 */
@@ -66,13 +66,42 @@ class EffectBase extends FXBase {
 
 		aux.destroy();
 		aux = null;
-		if(effect != 0) HaxeEFX.deleteEffect(effect);
+		HaxeEFX.deleteEffect(effect);
+	}
+
+	/**
+	 * Unloads this effect up and renders it unuseable until loaded again, querying it for deletion.
+	 * The query-list can be cleared using `CacheHandler.queryCache.clearFXQuery()`.
+	 * 
+	 * Memory will be cleared when the effect has been deleted and the garbage collector has been activated.
+	 * Should not be used if loaded has the value false.
+	 */
+	public function queryUnload() {
+		_snd.loadedEffects.remove(this);
+		loaded = false;
+
+		aux.queryDestroy();
+		aux = null;
+		CacheHandler.queryCache.fxCleanQuery.push(effect);
 	}
 
 	override public function destroy() {
 		if(loaded) unload();
 		
 		super.destroy();
+	}
+
+	/**
+	 * Destroys this effect and renders it unuseable, querying it for deletion.
+	 * The query-list can be cleared using `CacheHandler.queryCache.clearFXQuery()`.
+	 * 
+	 * Memory will be cleared when the effect has been deleted and the garbage collector has been activated.
+	 * Should not be used if loaded has the value false.
+	*/
+	public function queryDestroy() {
+		if(loaded) queryUnload();
+
+		super.destroy(); // I did not know this worked
 	}
 
 

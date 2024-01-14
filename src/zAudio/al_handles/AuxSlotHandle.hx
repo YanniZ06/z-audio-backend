@@ -60,13 +60,19 @@ class AuxSlotHandle
 	/**
 	 * Renders this Effect Slot unuseable and marks it for garbage collection, freeing memory.
 	 */
-	public function destroy() //TODO: delete filter and fx??? yes??
+	public function destroy() //TODO: delete filter and fx??? yes?? | aux slots are tied to effects, not effects to aux slots, we shouldnt do this, the fuck was i thinking
 	{
-		if (appliedSrc != null)
+		if(appliedSrc != null)
 			removeFromSrc();
 
 		HaxeEFX.deleteAuxiliaryEffectSlot(handle);
-		if(appliedFX != 0) HaxeEFX.deleteEffect(appliedFX);
+	}
+
+	public function queryDestroy() {
+		if(appliedSrc != null)
+			removeFromSrc();
+		
+		CacheHandler.queryCache.auxCleanQuery.push(handle);
 	}
 
 	/**
@@ -112,5 +118,5 @@ enum abstract ALAuxSlotParam(Int) from Int to Int
 	public static inline var EFFECTSLOT_GAIN:ALAuxSlotParam = 0x0002; // The volume of this Aux Slot, sort of like a master volume on how much this effect should be applied overall
 	public static inline var EFFECTSLOT_AUXILIARY_SEND_AUTO:ALAuxSlotParam = 0x0003; // ?? Figure this out properly
 	/* NULL Auxiliary Slot ID to disable a source send. */
-	// public static inline var EFFECTSLOT_NULL:ALAuxSlotParam = 0x0000;		//Use removeSend instead
+	// public static inline var EFFECTSLOT_NULL:ALAuxSlotParam = 0x0000;		//Use removeSend instead | NAWWWW
 }
