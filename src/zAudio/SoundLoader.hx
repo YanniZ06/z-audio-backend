@@ -197,7 +197,6 @@ class SoundLoader
 		return getCache(filePath);
 	}
 
-	// TODO: test this!!
 	static inline function checkCache(address:String):Null<BufferHandle> {
 		var cache = CacheHandler.soundCache[address];
 		if(cache == null) return null;

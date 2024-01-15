@@ -282,12 +282,24 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
      * If this function is called directly, queried objects will not be deleted until instructed to do so via `CacheHandler.clearFullQuery()`.
      */
     public function queryDestroy() {
-        trace("NOT IMPLEMENTED, DESTROYING REGUARLY INSTEAD"); // TODO: kill this
-        destroy();
-    }
+        CacheHandler.soundCache[cacheAddress].sounds.remove(this);
+        cacheAddress = null;
 
-    // TODO: quick destroy function (aka literally just get rid of that removal mark checker), this sounds irrelevant but if we getting rid of like 20-25 diff sounds at once
-    // TODO: this could be pretty decent way to save on a few ms. micro optimization at that level so maybe i just make destroy "quicker" overall???
+        if(efx_init) cleanup_EFX(); //Get rid of / unload all fx -> if available
+
+        buffer.destroy();
+        source.queryDestroy();
+        if(finishTimer != null) {
+            finishTimer.stop();
+            finishTimer = null;
+        }
+        //id = null;
+		buffer = null;
+		source = null;
+        timeGetter = null;
+        timeSetter = null;
+        onFinish = null;
+    }
 
     function switchPlaying() {
         byteOffsetGetter = !playing ? getByteOffset_Paused : getByteOffset_Playing;

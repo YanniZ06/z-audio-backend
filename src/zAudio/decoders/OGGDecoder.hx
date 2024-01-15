@@ -95,7 +95,7 @@ class VorbisFile {
      * Clears this VorbisFile along with all its contents and returns true if successful, otherwise false.
      */
     public function dispose():Bool {
-        //TODO: free integers, strings and booleans aswell?
+        fPath = null;
         return Ogg.ov_clear(fVorbis) == 0 ? true : false;
     }
 

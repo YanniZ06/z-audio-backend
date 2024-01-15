@@ -25,8 +25,8 @@ class FilterBase extends FXBase {
 	}
 
 	/**
-	 * Destroys this Filter and renders it unuseable, also freeing its allocated memory.
-	 */
+	 * Destroys this filter and renders it unuseable, also freeing its allocated memory.
+	*/
 	override public function destroy() {
 		removeDirectFilter();
 		@:privateAccess _snd.activeFilter = null;
@@ -36,7 +36,13 @@ class FilterBase extends FXBase {
 
 		HaxeEFX.deleteFilter(filter);
 	}
-
+	
+	/**
+	 * Destroys this filter and renders it unuseable, querying it for deletion.
+	 * The query-list can be cleared using `CacheHandler.queryCache.clearFilterQuery()`.
+	 * 
+	 * Memory will be cleared when the filter has been deleted and the garbage collector has been activated.
+	 */
 	public function queryDestroy() {
 		removeDirectFilter();
 		@:privateAccess _snd.activeFilter = null;
@@ -44,7 +50,7 @@ class FilterBase extends FXBase {
 
 		super.destroy();
 
-		// CacheHandler.queryCache;
+		CacheHandler.queryCache.filterCleanQuery.push(filter);
 	}
 
 	function set_enabled(val:Bool):Bool {

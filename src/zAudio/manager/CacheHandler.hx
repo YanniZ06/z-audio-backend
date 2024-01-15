@@ -88,6 +88,7 @@ class CacheHandler {
         var buf = soundCache[path].buffer;
         soundCache.remove(path);
 
+        HaxeAL.deleteBuffer(buf.handle);
         buf.destroy();
         buf = null;
 
@@ -100,7 +101,7 @@ class CacheHandler {
     /**
      * Removes all sounds with `path` cache address efficiently, clearing their associated cache from the memory entirely.
      * 
-     * If no sound stored at `path` is found in the cache, this function will throw a Null Object Reference.
+     * If no entry stored at `path` is found in the cache, this function will throw a Null Object Reference.
      * If you need to check whether this is the case, use `existsInCache`.
      * 
      * This function renders all of the sounds unuseable as they are destroyed, so use carefully!
@@ -116,8 +117,43 @@ class CacheHandler {
             var sound = sounds[0];
             sound.queryDestroy();
         }
-        removeFromCache(path); // Clear cache
+
         queryCache.clearFullQuery(); // Get rid of everything at once
+        removeFromCache(path); // Clear cache and call GC
+    }
+
+    /**
+     * Removes all sounds with a cacheAddress mentioned in the list efficiently, clearing their associated cache from the memory entirely.
+     * 
+     * If a path in the list has no associated cache-entry, this function will throw a Null Object Reference.
+     * If you need to check whether this is the case, use `existsInCache`.
+     * 
+     * This function renders all of the sounds unuseable as they are destroyed, so use carefully!
+     * 
+     * This function also force-calls the garbage collector (unless the ZAUDIO_DISALLOW_GC flag is set).
+     * @param list Addresses to the caches you want to ensure are removed from memory.
+     */
+    public static function removeMemoryList(list:Array<String>) {
+        for(path in list) {
+            var sounds = soundCache[path].sounds;
+    
+            for(i in 0...sounds.length) {
+                var sound = sounds[0];
+                sound.queryDestroy();
+            }
+            var buf = soundCache[path].buffer;
+            soundCache.remove(path);
+    
+            CacheHandler.queryCache.bufferCleanQuery.push(buf.handle);
+            buf.destroy();
+            buf = null;
+        }
+        queryCache.clearFullQuery();
+
+        #if !ZAUDIO_DISALLOW_GC
+        cpp.vm.Gc.run(false);
+        cpp.vm.Gc.compact();
+        #end
     }
 
     /**

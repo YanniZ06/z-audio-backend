@@ -64,10 +64,8 @@ class SourceHandle
 		parentSound.initialized = false;
 	}
 
-	// TODO: queryDestroy
 	/**
 	 * Gets rid of `this` SourceHandle and renders it unuseable.
-	 * Also destroys the connected buffer in the process.
 	 * 
 	 * Memory will be cleared the next time the garbage collector is activated.
 	 */
@@ -76,7 +74,23 @@ class SourceHandle
 		HaxeAL.deleteSource(handle);
 		
 		parentSound.source = null;
-		parentSound.initialized = false; //Should be false eitherway but just making sure // todo ??? check this, maybe we are setting something for no reason!!
+		parentSound.initialized = false;
+		parentSound = null;
+	}
+
+
+	/**
+	 * Gets rid of `this` SourceHandle and renders it unuseable, querying it for deletion.
+	 * The query-list can be cleared using `CacheHandler.queryCache.clearSrcQuery()`.
+	 * 
+	 * Memory will be cleared when the source has been deleted and the garbage collector has been activated.
+	 */
+	public function queryDestroy() {
+		if(buffer != null) detachBuffer();
+		CacheHandler.queryCache.srcCleanQuery.push(handle);
+
+		parentSound.source = null;
+		parentSound.initialized = false;
 		parentSound = null;
 	}
 }
