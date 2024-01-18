@@ -41,7 +41,9 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
      */
     public var initialized:Bool = false;
     /**
-     * Function to call when this sound has finished playing
+     * Function to call when this sound has finished playing.
+     * 
+     * Also gets called when a sound is looping and finishes a loop.
      */
     public var onComplete:Void -> Void = null;
     /**
@@ -157,7 +159,6 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         finishTimer = new Timer(500); //Avoid a null ref when destroying sound that hasnt been played once (whyever you'd do that)
         finishTimer.stop();
 
-        // todo implement on buffer changes aswell
         totalSeconds = buffer.samples / buffer.sampleRate;
     }
 
@@ -185,6 +186,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         
         cacheAddress = newAddress;
         CacheHandler.soundCache[newAddress].sounds.push(this);
+        totalSeconds = buffer.samples / buffer.sampleRate;
     }
 
     /**
@@ -302,9 +304,12 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         onFinish = null;
     }
 
+    // ? Why do you exist youre not even used
+    // ! removed soon
     function switchPlaying() {
-        byteOffsetGetter = !playing ? getByteOffset_Paused : getByteOffset_Playing;
-        byteOffsetSetter = !playing ? setByteOffset_Paused : setByteOffset_Playing;
+        if(!playing) { byteOffsetGetter = getByteOffset_Paused; byteOffsetSetter = setByteOffset_Paused; }
+        else { byteOffsetGetter = getByteOffset_Playing; byteOffsetSetter = setByteOffset_Playing; }
+
         /*if(playing) { //Uncomment if all else fails
             HaxeAL.sourcePlay(source.handle);
             setByteOffset_Playing(getByteOffset_Paused()); //Cannot set the byte offset on non-playing sources, I hate this
@@ -411,21 +416,18 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         return b;
     }
 
-    function setTimer(val:Float) {
+    var onFinish:Void -> Void;
+    function setTimer(msLeft:Float) {
         if(finishTimer != null) finishTimer.stop();
 
-        if (val <= 30) {
-			finishSound();
+        if (msLeft <= 30) {
+			onFinish();
 			return;
 		}
         finished = finishedReverse = false;       
-        finishTimer = new Timer(val);
-        finishTimer.run = finishSound;
+        finishTimer = new Timer(msLeft);
+        finishTimer.run = onFinish;
     }
-
-    var onFinish:Void -> Void;
-    function finishSound()
-        onFinish();
 
     function finishRegular() {
         var timeRemaining = Std.int((length - time) / pitch); // THIS ENSURES SOUND DOESNT STOP WHEN THE APP AUTOPAUSES
@@ -506,13 +508,11 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     var totalSeconds:Float;
     function timeSetRegular(val:Float) {
         if(val > length - 10) {
-            finishSound();
+            onFinish();
             return;
         }
 
         var secondOffset = (val/*+ offset*/) / 1000;
-        var 
-
         if (secondOffset < 0) secondOffset = 0;
         if (secondOffset > totalSeconds) secondOffset = totalSeconds;
 
@@ -533,7 +533,6 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
 
         final val = length - val_;
         var secondOffset = (val/*+ offset*/) / 1000;
-        var totalSeconds = buffer.samples / buffer.sampleRate;
 
         if (secondOffset < 0) secondOffset = 0;
         if (secondOffset > totalSeconds) secondOffset = totalSeconds;
