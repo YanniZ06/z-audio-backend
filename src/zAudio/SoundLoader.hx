@@ -1,15 +1,14 @@
 package zAudio;
 
-import cpp.Native;
-import cpp.Pointer;
-// import decoder.Mp3Decoder;
 import haxe.Timer;
 import haxe.http.HttpBase;
 import haxe.io.Bytes;
 import sys.io.File;
 import zAudio.al_handles.BufferHandle;
-import zAudio.decoders.MP3Decoder;
 import zAudio.decoders.errors.*;
+import zAudio.decoders.MP3Decoder;
+import zAudio.decoders.OGGDecoder.VorbisFile;
+
 
 class SoundLoader
 {
@@ -133,6 +132,24 @@ class SoundLoader
 	// Load functions avoid having to check cache twice, do the actual decoding and loading in tasks
 
 	private static function oggLoad(filePath:String, preloadReverse:Bool):BufferHandle {
+		var decoder:VorbisFile = VorbisFile.makeVorbisFileFrom(filePath);
+		if(!decoder.valid) {
+			__eFILE = FAILED_SETUP;
+			return null;
+		}
+		decoder.readInfoHeader();
+		var rawData = decoder.readFullFile();
+		trace(rawData.length);
+
+		trace(decoder.bitsPerSample);
+		
+		var buffer = new BufferHandle(HaxeAL.createBuffer()).fill(decoder.channels, decoder.bitsPerSample, rawData, decoder.sampleRate, preloadReverse);
+		buffer.cacheAddress = filePath;
+		buffer.onCleanup = () -> { decoder.dispose(); decoder = null; };
+
+		CacheHandler.soundCache.set(filePath, {markedForRemoval: false, hasReverseCache: preloadReverse, sounds: [], buffer: buffer});
+
+		return getCache(filePath);
 /*		
 		var buffer = new BufferHandle(HaxeAL.createBuffer()).fill(channels, bitsPerSample, rawData, samplingRate, preloadReverse);
 		buffer.cacheAddress = filePath;

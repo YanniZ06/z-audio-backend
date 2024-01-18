@@ -16,4 +16,8 @@ enum abstract FILEError(cpp.Int8) {
      * The bytes of the file do not match with ones that are decoded in RIFF-WAVE, OGG-VORBIS or MP3 format.
      */
     var UNSUPPORTED_FORMAT:FILEError = -2;
+    /**
+     * Could not setup the decoder for an OGG or streamed file.
+     */
+    var FAILED_SETUP:FILEError = -3;
 }

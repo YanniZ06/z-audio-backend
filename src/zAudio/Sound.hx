@@ -152,12 +152,13 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         @:privateAccess cacheAddress = inputBuffer.cacheAddress;
         if(initializeEFX) init_EFX(this);
 
-        trace(CacheHandler.soundCache);
-        trace(cacheAddress);
         CacheHandler.soundCache[cacheAddress].sounds.push(this);
 
         finishTimer = new Timer(500); //Avoid a null ref when destroying sound that hasnt been played once (whyever you'd do that)
         finishTimer.stop();
+
+        // todo implement on buffer changes aswell
+        totalSeconds = buffer.samples / buffer.sampleRate;
     }
 
     @:noCompletion var reverseChange:Bool = false;
@@ -502,6 +503,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     function getByteOffset_Paused() return pause_offset;
 
 
+    var totalSeconds:Float;
     function timeSetRegular(val:Float) {
         if(val > length - 10) {
             finishSound();
@@ -509,7 +511,7 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
         }
 
         var secondOffset = (val/*+ offset*/) / 1000;
-        var totalSeconds = buffer.samples / buffer.sampleRate;
+        var 
 
         if (secondOffset < 0) secondOffset = 0;
         if (secondOffset > totalSeconds) secondOffset = totalSeconds;

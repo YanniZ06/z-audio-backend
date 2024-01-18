@@ -4,13 +4,7 @@ package zAudio.decoders;
 // Documentation here: https://xiph.org/vorbis/doc/vorbisfile/
 
 import haxe.io.Bytes;
-import zAudio.decoders.ogg.Ogg;
-//import zAudio.decoders.ogg.Ogg.OggVorbisFile;
-class OGGDecoder {
-    public static function makeVorbisFileFrom(path:String):VorbisFile {
-        return new VorbisFile(path, Ogg.newOggVorbisFile());
-    }
-}
+import ogg.Ogg;
 
 class VorbisFile {
     /**
@@ -29,6 +23,13 @@ class VorbisFile {
     public var valid:Bool = true;
 
     /**
+     * Represents this VorbisFiles' current error code.
+     * 
+     * Can be checked after an operation to ensure everything is going smoothly.
+     */
+    public var errorCode:Int = 0;
+
+    /**
      * Amount of channels this VorbisFile has.
      * 
      * Call `readInfo()` to properly initialize this value.
@@ -43,6 +44,13 @@ class VorbisFile {
     public var sampleRate:Int = 0;
 
     /**
+     * BPS this VorbisFile has.
+     * 
+     * Call `readInfo()` to properly initialize this value.
+     */
+    public var bitsPerSample:Int = 0;
+
+    /**
      * Size this VorbisFile has.
      * 
      * Call `readInfo()` to properly initialize this value.
@@ -51,7 +59,7 @@ class VorbisFile {
     /**
      * Creates a new VorbisFile handler for the vorbis file located at `filePath`.
      * 
-     * Shouldn't be used manually but through `OGGDecoder.makeVorbisFileFrom(path)`.
+     * Shouldn't be used manually but through `makeVorbisFileFrom(path)`.
      * @param filePath Path to the ogg-vorbis file you want to load
      * @param container A handler for an `OggVorbisFile`.
      */
@@ -61,7 +69,7 @@ class VorbisFile {
 
         final fileRes = Ogg.ov_fopen(fPath, fVorbis);
         if(fileRes != 0) {
-            trace('Error loading sound from path "$path": ${code(fileRes)}');
+            #if ZAUDIO_DEBUG trace('Error loading sound from path "$fPath": ${code(fileRes)}'); #end
             valid = false;
             return;
         }
@@ -72,10 +80,15 @@ class VorbisFile {
      * Fills channel and sampleRate information, aswell as fileSize
      */
     public function readInfoHeader() {
-        final info = Ogg.ov_info(fVorbis, -1);
+        final info:VorbisInfo = Ogg.ov_info(fVorbis, -1);
         sampleRate = info.rate;
         channels = info.channels;
         fSize = sys.FileSystem.stat(fPath).size;
+        bitsPerSample = info.bitrate_nominal / sampleRate > 12 ? 16 : 8;
+
+        trace(sampleRate);
+        trace(info.bitrate_nominal);
+        trace(info.bitrate_nominal / sampleRate);
     }
 
     /**
@@ -87,8 +100,7 @@ class VorbisFile {
             final res = Ogg.ov_read(fVorbis, bytes.getData(), 0, 4096, OggEndian.TYPICAL, OggWord.TYPICAL, OggSigned.TYPICAL);
             if(res == 0) break; // EOF
         }
-        trace(bytes.getData()); // Yeah sure lets trace all of the content we just got. Good idea.
-        return bytes.getData();
+        return bytes;
     }
 
     /**
@@ -97,6 +109,10 @@ class VorbisFile {
     public function dispose():Bool {
         fPath = null;
         return Ogg.ov_clear(fVorbis) == 0 ? true : false;
+    }
+
+    public static function makeVorbisFileFrom(path:String):VorbisFile {
+        return new VorbisFile(path, Ogg.newOggVorbisFile());
     }
 
     //converts return code to string

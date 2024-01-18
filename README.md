@@ -13,17 +13,21 @@ Then Grab the dll from this site (https://github.com/YanniZ06/HaxeAL-Soft/blob/i
 If you've done everything correctly the library should now work fine.
 Of course this is quite a hassle, so it's best you write a quick installer that takes care of this process for the user.
 
+## Additional Compiling Instructions
+The "linc_ogg" library must be installed to compile. You can do so via "haxelib git linc_ogg https://github.com/snowkit/linc_ogg.git". (Will be added as a req later aswell)
+For testing in its current state you also need to install flixel 5.2.2, lime 8.0.1 and openfl 9.2.1 (along with haxe 4.3.0)
+
 ## Progress and Features
 This library isn't finished yet, so here's seperate progress reports and current features!
 
 ### General Sound Playback: 100%
 - Sounds with full PCM-Data can be played back reguarly, in reverse, with any effect or filter applied etc.
 
-### Sound Decoding: 80%
+### Sound Decoding: 90%
 - WAV and MP3 can be decoded
-- OGG awaits re-implementation after getting rid of lime, shouldn't be too difficult however
+- OGG is being implemented
 
-### Documentation: 70%
+### Documentation: 86%
 - A bunch of stuff still needs to be documented properly
 -> Include Code that has yet to be written.
 
