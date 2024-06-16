@@ -496,6 +496,9 @@ class Sound extends Sound_FxBackend implements SoundBaseI {
     var pause_offset:Int = 1;
     var byteOffsetSetter:Int -> Void;
     var byteOffsetGetter:Void -> Int;
+    inline function setByteOffset(val:Int) {
+        
+    }
     function setByteOffset_Playing(val:Int) {
         HaxeAL.sourcei(source.handle, HaxeAL.BYTE_OFFSET, val);
         pause_offset = val;

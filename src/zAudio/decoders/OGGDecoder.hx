@@ -96,9 +96,17 @@ class VorbisFile {
      */
     public function readFullFile():Bytes {
         var bytes:Bytes = Bytes.alloc(fSize);
+        var i = 0;
         while(true) {
+            i++;
             final res = Ogg.ov_read(fVorbis, bytes.getData(), 0, 4096, OggEndian.TYPICAL, OggWord.TYPICAL, OggSigned.TYPICAL);
             if(res == 0) break; // EOF
+        }
+        trace(i);
+        for(i=>byte in bytes.getData()) {
+            if(i < 200) continue;
+            // trace(byte);
+            if(i > 400) break;
         }
         return bytes;
     }

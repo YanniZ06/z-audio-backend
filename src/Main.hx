@@ -16,6 +16,6 @@ class Main extends Sprite
 		Initializer.initialize_ZAudio();
 
 		flixel.FlxG.autoPause = false;
-		addChild(new FlxGame(0, 0, tests.PlayState));
+		addChild(new FlxGame(0, 0, tests.PlayState, 120, 120));
 	}
 }
