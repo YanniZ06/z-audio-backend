@@ -43,7 +43,7 @@ class BufferHandle
 		if(doPreloadReverseData) preloadReverseData();
 		fill_Info(channels, bitsPerSample, sampleRate);
 
-		HaxeAL.bufferData(handle, format, data, dataLength, sampleRate);
+		HaxeAL.bufferDataArray(handle, format, data.getData(), sampleRate);
 
 		/*if(parentSource != null) {
 			parentSource.parentSound.changeLength(Std.int(samples / sampleRate * 1000));
@@ -79,7 +79,7 @@ class BufferHandle
 		//if(curCache == null) return;
 
 		curCache.hasReverseCache = true;
-		for(snd in curCache.sounds)
+		for(snd in curCache.sounds) // This might not even be necessary since they're all references??
 			snd.buffer.reverseData = reverseData;
 		
 		curCache.buffer.reverseData = reverseData;

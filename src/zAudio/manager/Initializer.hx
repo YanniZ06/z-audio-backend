@@ -43,7 +43,7 @@ class Initializer {
         
         // Checks if EFX is available and tries to set highest max efx count for sounds if true
         supports_EFX = HaxeALC.isExtensionPresent(current_Device, 'ALC_EXT_EFX');
-        final attributes:Null<Array<Int>> = supports_EFX ? [HaxeEFX.MAX_AUXILIARY_SENDS, 6] : null; 
+        final attributes:Null<Array<Int>> = supports_EFX ? [HaxeEFX.MAX_AUXILIARY_SENDS, 15] : null; 
         current_Context = HaxeALC.createContext(current_Device, attributes);
 
         if(current_Context == null) throw 'Failed to initialize HaxeAL-Soft backend!\nNo proper context could be created!\n\nTry restarting the application.';

@@ -173,7 +173,7 @@ class SoundLoader
 			return getCache(filePath);
 		}
 		#end*/
-		return null;
+		//return null;
 	}
 
 	private static function wavLoad(bytes:Bytes, filePath:String, preloadReverse:Bool) {
@@ -199,7 +199,6 @@ class SoundLoader
 		return getCache(filePath);
 	}
 
-	//Must i repeat myself
 	private static function mp3Load(bytes:Bytes, filePath:String, preloadReverse:Bool) {
 		var decoder = new MP3Decoder(bytes);
 		decoder.decode();
@@ -214,6 +213,7 @@ class SoundLoader
 		return getCache(filePath);
 	}
 
+	// Cache reading pre-defines (theyre identical apart from one checking the cache beforehand)
 	static inline function checkCache(address:String):Null<BufferHandle> {
 		var cache = CacheHandler.soundCache[address];
 		if(cache == null) return null;
@@ -240,8 +240,8 @@ class SoundLoader
 	}
 
 	// -- Utility loading functions --
-	// Used by WEB Loading
-	private static function bufferFromBytes(bytes:Bytes, path:String, preloadReverse:Bool):BufferHandle {
+	// Used with actual bytes to read from
+	private static function bufferFromBytes(bytes:Bytes, path:String, preloadReverse:Bool, urlLoad:Bool = true):Null<BufferHandle> {
 		final fileSignature:String = bytes.getString(0, 4);
 
 		switch (fileSignature) // File Signature
@@ -252,7 +252,10 @@ class SoundLoader
 				switch ([bytes.get(0), bytes.get(1), bytes.get(2)])
 				{
 					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return mp3Load(bytes, path, preloadReverse);
-					default: __eURL = UNSUPPORTED_FORMAT; #if ZAUDIO_DEBUG trace('Invalid sound format or file-header "$fileSignature"!'); #end
+					default: 
+						if(urlLoad) __eURL = UNSUPPORTED_FORMAT; 
+						else __eFILE = UNSUPPORTED_FORMAT;
+						#if ZAUDIO_DEBUG trace('Invalid sound format or file-header "$fileSignature"!'); #end
 				}
 		}
 		return null;
@@ -261,37 +264,14 @@ class SoundLoader
 	}
 
 	// Used by per-path loading
-	private static function bufferFromString(path:String, preloadReverse:Bool):BufferHandle {
-		var bytes:sys.io.FileInput;
-		try { bytes = File.read(path); }
+	private static function bufferFromString(path:String, preloadReverse:Bool):Null<BufferHandle> {
+		var bytes:Bytes;
+		try { bytes = sys.io.File.getBytes(path); }
 		catch(e) {
 			__eFILE = FILE_NOT_FOUND;
 			#if ZAUDIO_DEBUG trace('Could not find or access file at "$path"'); #end
 			return null;
 		}
-
-		final fileSignature:String = bytes.readString(4);
-		bytes.seek(8, SeekBegin); 
-
-		inline function finish(ret:BufferHandle) { // To make sure we close the fileinput before exiting this function
-			bytes.close();
-
-			return ret;
-		}
-		switch (fileSignature)
-		{
-			case "OggS": return finish(oggLoad(path, preloadReverse));
-			case "RIFF" if (bytes.readString(4) == "WAVE"): return finish(wavLoad(bytes.readAll(), path, preloadReverse));
-			default:
-				bytes.seek(0, SeekBegin);
-				final mp3Signature = [bytes.readByte(), bytes.readByte(), bytes.readByte()];
-
-				switch (mp3Signature)
-				{
-					case [73, 68, 51] | [255, 251, _] | [255, 250, _] | [255, 243, _]: return finish(mp3Load(bytes.readAll(), path, preloadReverse));
-					default: __eFILE = UNSUPPORTED_FORMAT; #if ZAUDIO_DEBUG trace('Invalid sound format or file-header "$fileSignature"!'); #end
-				}
-		}
-		return null;
+		return bufferFromBytes(bytes, path, preloadReverse, false);
 	}
 }

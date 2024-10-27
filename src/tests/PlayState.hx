@@ -22,6 +22,7 @@ class PlayState extends FlxState
 	{
 
 		super.create();
+		
 		/*var soundInfo = SoundLoader.fromFile("assets/snd/wavTest.wav", true);
 		// trace(soundInfo);
 		snd2 = new ZSound(soundInfo);
@@ -29,14 +30,14 @@ class PlayState extends FlxState
 		//snd2.play();
 		new FlxTimer().start(6, _ -> CacheHandler.removeFromMemory("assets/snd/wavTest.wav"));*/
 
-		snd = new ZSound(SoundLoader.fromFile("assets/snd/inspected.ogg"));
+		snd = new ZSound(SoundLoader.fromFile("assets/snd/wavTest.wav"));
 		snd.bandpass.enabled = false;
 		snd.bandpass.gain_lf = 0.1;
 		snd.maxVolume = 10;
 		snd.looping = true;
 		snd.reverb.enabled = true;
 
-		snd2 = new ZSound(SoundLoader.fromFile("assets/snd/inspected.ogg"));
+		snd2 = new ZSound(SoundLoader.fromFile("assets/snd/wavTest.wav"));
 		snd2.bandpass.enabled = false;
 		snd2.bandpass.gain_lf = 0.1;
 		snd2.maxVolume = 10;
@@ -110,7 +111,7 @@ class PlayState extends FlxState
 		if(FlxG.keys.justPressed.P) snd.pause();
 		if(FlxG.keys.justPressed.SPACE) { 
 			snd.play(); //hey
-			new FlxTimer().start(1, _ -> snd2.play()); //test
+			//new FlxTimer().start(1, _ -> snd2.play()); //test
 		}
 
 		var mod = FlxG.keys.pressed.SHIFT ? 3 : 1;

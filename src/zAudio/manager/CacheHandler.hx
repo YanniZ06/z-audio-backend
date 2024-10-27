@@ -22,7 +22,7 @@ class CacheHandler {
     /**
      * A map containing all paths to sounds you want to keep cached after a `markFullCache()` call.
      * 
-     * Every path in this map needs to be removed manually (by you), so keep that in mind.
+     * Every path in this map needs to be removed manually (by you) as it is never cleared automatically, so keep that in mind.
      *
      * Simply do `keepCacheSounds.set("yourAsset_orWebPath.wav_or_ogg", true)` to keep a sound safe from general buffer cache clearing (`markFullCache()`).
      * 

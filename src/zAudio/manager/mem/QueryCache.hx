@@ -43,7 +43,7 @@ class QueryCache {
     public inline function clearFXQuery():Void {
         if(!Initializer.supports_EFX) return;
 
-        EFX.deleteEffects(fxCleanQuery.length, BinderHelper.arrayEffect_ToPtr(fxCleanQuery));
+        HaxeEFX.deleteEffects(fxCleanQuery);
         fxCleanQuery = []; 
     }
 
@@ -53,7 +53,7 @@ class QueryCache {
     public inline function clearFilterQuery():Void {
         if(!Initializer.supports_EFX) return;
 
-        EFX.deleteFilters(filterCleanQuery.length, BinderHelper.arrayFilter_ToPtr(filterCleanQuery));
+        HaxeEFX.deleteFilters(filterCleanQuery);
         filterCleanQuery = [];
     }
 
@@ -63,7 +63,7 @@ class QueryCache {
     public inline function clearAuxQuery():Void {
         if(!Initializer.supports_EFX) return;
 
-        EFX.deleteAuxiliaryEffectSlots(auxCleanQuery.length, BinderHelper.arrayAuxiliaryEffectSlot_ToPtr(auxCleanQuery));
+        HaxeEFX.deleteAuxiliaryEffectSlots(auxCleanQuery);
         auxCleanQuery = [];
     }
 
@@ -71,7 +71,7 @@ class QueryCache {
      * Clears all queried buffers.
      */
     public inline function clearBufferQuery():Void {
-        AL.deleteBuffers(bufferCleanQuery.length, BinderHelper.arrayBuffer_ToPtr(bufferCleanQuery));
+        HaxeAL.deleteBuffers(bufferCleanQuery);
         bufferCleanQuery = [];
     }
 
@@ -79,7 +79,7 @@ class QueryCache {
      * Clears all queried sources.
      */
     public inline function clearSrcQuery():Void {
-        AL.deleteSources(srcCleanQuery.length, BinderHelper.arraySource_ToPtr(srcCleanQuery));
+        HaxeAL.deleteSources(srcCleanQuery);
         srcCleanQuery = [];
     }
 
@@ -87,14 +87,14 @@ class QueryCache {
      * Clears all queried objects.
      */
     public inline function clearFullQuery():Void {
-        AL.deleteBuffers(bufferCleanQuery.length, BinderHelper.arrayBuffer_ToPtr(bufferCleanQuery));
-        AL.deleteSources(srcCleanQuery.length, BinderHelper.arraySource_ToPtr(srcCleanQuery));
+        HaxeAL.deleteBuffers(bufferCleanQuery);
+        HaxeAL.deleteSources(srcCleanQuery);
 
         if(!Initializer.supports_EFX) { bufferCleanQuery = srcCleanQuery = []; return; }
 
-        EFX.deleteEffects(fxCleanQuery.length, BinderHelper.arrayEffect_ToPtr(fxCleanQuery));
-        EFX.deleteFilters(filterCleanQuery.length, BinderHelper.arrayFilter_ToPtr(filterCleanQuery));
-        EFX.deleteAuxiliaryEffectSlots(auxCleanQuery.length, BinderHelper.arrayAuxiliaryEffectSlot_ToPtr(auxCleanQuery));
+        HaxeEFX.deleteEffects(fxCleanQuery);
+        HaxeEFX.deleteFilters(filterCleanQuery);
+        HaxeEFX.deleteAuxiliaryEffectSlots(auxCleanQuery);
         bufferCleanQuery = srcCleanQuery =  fxCleanQuery = filterCleanQuery = auxCleanQuery = [];
     }
 }

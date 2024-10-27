@@ -29,7 +29,16 @@
 
 	<!-- _____________________________ Path Settings ____________________________ -->
 
-	<set name="BUILD_DIR" value="export" />
+	<section unless="debug">
+		<set name="BUILD_DIR" value="export/release" />
+		<haxedef name="HAXEAL_APP_PATH" value="export/release/windows/bin/AudioTest.exe"/>
+	</section>
+
+	<section if="debug">
+		<set name="BUILD_DIR" value="export/debug" />
+		<haxedef name="HAXEAL_APP_PATH" value="export/debug/windows/bin/AudioTest.exe"/>
+	</section>
+
 	<source path="src" />
 	<assets path="assets" />
 
@@ -44,6 +53,8 @@
 	<haxedef name="FLX_NO_SOUND_SYSTEM" value="true"/>
 	<haxedef name="HAXEAL_DEBUG" value="true"/>
 	<haxedef name="ZAUDIO_DEBUG" value="true"/>
+
+	<haxedef name="HAXEAL_DEBUG_SOFT_LOGLEVEL" value="3"/>
 
 
 	<!-- <haxedef name ="windows" if="windows"> --> <!-- That would be stupid -->

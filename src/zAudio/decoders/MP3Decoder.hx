@@ -1709,6 +1709,7 @@ void mp3dec_f32_to_s16(const float *in, int16_t *out, int num_samples)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// todo: use hxcpp array type like in haxeal-soft instead
 int8_t* DecodeMp3ToBuffer(unsigned char *buf, int music_size, uint32_t *sampleRate, uint32_t *totalSampleCount, unsigned int *channels)
 {
     int alloc_samples = 1024 * 1024, num_samples = 0;
